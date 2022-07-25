@@ -13,7 +13,7 @@ void env::build_phase(uvm::uvm_phase &phase) {
   uvm::uvm_env::build_phase(phase);
   uvm::uvm_config_db_options::turn_on_tracing();
 
-  apb_vif = new apb_if("apb_slave", &clk);
+  apb_vif = new Apb_if("apb_slave", &clk);
   nmi_vif = new nmi_if("nmi_master", &clk);
 
   apb_ag = new apb_agent("apb_agent_slave");
@@ -21,7 +21,7 @@ void env::build_phase(uvm::uvm_phase &phase) {
                                uvm::UVM_ACTIVE);
   uvm::uvm_config_db<apb::mode_t>::set(this, "apb_agent_slave", "mode",
                                        apb::SLAVE);
-  uvm::uvm_config_db<apb_if *>::set(this, "apb_agent_slave", "vif", apb_vif);
+  uvm::uvm_config_db<Apb_if *>::set(this, "apb_agent_slave", "vif", apb_vif);
   nmi_ag = new nmi_agent("nmi_agent_master");
   uvm::uvm_config_db<int>::set(this, "nmi_agent_master", "is_active",
                                uvm::UVM_ACTIVE);

@@ -34,7 +34,7 @@ public:
 
   sc_signal<bool> bcd;
 
-  apb_if *apb_vif;
+  Apb_if *apb_vif;
   nmi_if *nmi_vif;
 
   apb_agent *apb_ag;

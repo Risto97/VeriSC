@@ -37,7 +37,7 @@ void apb_monitor::build_phase(uvm::uvm_phase & phase)
         sigs = agent->vif;
     }
     else {
-        if (!uvm::uvm_config_db<apb_if*>::get(this, "", "vif", sigs)) {
+        if (!uvm::uvm_config_db<Apb_if*>::get(this, "", "vif", sigs)) {
             UVM_FATAL("APB/MON/NOVIF", "No virtual interface specified for this monitor instance");
         }
     }

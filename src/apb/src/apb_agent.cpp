@@ -47,7 +47,7 @@ void apb_agent::build_phase(uvm::uvm_phase& phase)
         assert(drv);
     }
 
-    if (!uvm::uvm_config_db<apb_if*>::get(this, "", "vif", vif)) {
+    if (!uvm::uvm_config_db<Apb_if*>::get(this, "", "vif", vif)) {
         UVM_FATAL("APB/AGT/NOVIF", "No virtual interface specified for this agent instance");
     }
 

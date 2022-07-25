@@ -11,6 +11,7 @@
 #include "apb_modes.h"
 
 
+
 class apb_agent : public uvm::uvm_agent
 {
     public:
@@ -20,7 +21,7 @@ class apb_agent : public uvm::uvm_agent
 
         apb::mode_t mode;
 
-        apb_if* vif;
+        Apb_if* vif;
 
         UVM_COMPONENT_UTILS(apb_agent);
 

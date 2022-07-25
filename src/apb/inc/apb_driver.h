@@ -20,7 +20,7 @@ class apb_driver : public uvm::uvm_driver<apb_rw>
         UVM_COMPONENT_UTILS(apb_driver);
 
         sc_core::sc_event trig;
-        apb_if* sigs;
+        Apb_if* sigs;
 
         apb::mode_t mode;
 

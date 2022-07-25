@@ -4,17 +4,19 @@
 #include <systemc>
 #include <uvm>
 
+
+template<uint32_t DATA_WIDTH=32, uint32_t ADDR_WIDTH=32>
 class apb_if : public sc_core::sc_module {
     public:
         sc_core::sc_clock  *pclk;
-        sc_core::sc_signal<sc_dt::sc_uint<32>> paddr;
+        sc_core::sc_signal<sc_dt::sc_uint<ADDR_WIDTH>> paddr;
         sc_core::sc_signal<bool>  psel;
         sc_core::sc_signal<bool>  penable;
         sc_core::sc_signal<bool>  pwrite;
         sc_core::sc_signal<bool>  pready;
-        sc_core::sc_signal<sc_dt::sc_uint<32>> prdata;
-        sc_core::sc_signal<sc_dt::sc_uint<4>> pstrb;
-        sc_core::sc_signal<sc_dt::sc_uint<32>> pwdata;
+        sc_core::sc_signal<sc_dt::sc_uint<DATA_WIDTH>> prdata;
+        sc_core::sc_signal<sc_dt::sc_uint<DATA_WIDTH/8>> pstrb;
+        sc_core::sc_signal<sc_dt::sc_uint<DATA_WIDTH>> pwdata;
 
         apb_if(const sc_core::sc_module_name & name, sc_core::sc_clock *clk_in) :
             sc_module(name),
@@ -31,5 +33,7 @@ class apb_if : public sc_core::sc_module {
     }
 
 };
+
+using Apb_if = apb_if<32, 32>;
 
 #endif /* APB_IF_H_ */

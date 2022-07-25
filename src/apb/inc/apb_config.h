@@ -4,12 +4,14 @@
 #include <systemc>
 #include <uvm>
 
+#include "apb_if.h"
+
 class apb_config : public uvm::uvm_object
 {
     public:
         UVM_OBJECT_UTILS(apb_config);
 
-        apb_if* vif;
+        Apb_if* vif;
 
         apb_config(const std::string & name = "apb_config") {};
 };

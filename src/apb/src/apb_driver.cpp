@@ -26,7 +26,7 @@ void apb_driver::build_phase(uvm::uvm_phase & phase)
         mode = agent->mode;
     }
     else {
-        if (!uvm::uvm_config_db<apb_if*>::get(this, "", "vif", sigs)) {
+        if (!uvm::uvm_config_db<Apb_if*>::get(this, "", "vif", sigs)) {
             UVM_FATAL("APB/DRV/NOVIF", "No virtual interface specified for this driver instance");
         }
         if(!uvm::uvm_config_db<apb::mode_t>::get(this, "", "mode", mode)){

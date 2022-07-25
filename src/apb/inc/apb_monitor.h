@@ -10,7 +10,7 @@
 class apb_monitor : public uvm::uvm_monitor
 {
     public:
-        apb_if* sigs;
+        Apb_if* sigs;
 
         sc_core::sc_signal<sc_dt::sc_uint<32>> *paddr_old;
         sc_core::sc_signal<bool>  *psel_old;
