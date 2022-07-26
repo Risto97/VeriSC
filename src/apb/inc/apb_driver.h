@@ -19,7 +19,6 @@ class apb_driver : public uvm::uvm_driver<apb_rw>
     public:
         UVM_COMPONENT_UTILS(apb_driver);
 
-        sc_core::sc_event trig;
         Apb_if* sigs;
 
         apb::mode_t mode;
@@ -33,8 +32,8 @@ class apb_driver : public uvm::uvm_driver<apb_rw>
         virtual void run_phase(uvm::uvm_phase & phase);
 
     private:
-        void read(const sc_dt::sc_lv<32> & addr, sc_dt::sc_lv<32> & data, const sc_dt::sc_lv<4> & strb, const bool valid);
-        void write(const sc_dt::sc_lv<32> & addr, const sc_dt::sc_lv<32> & data, const sc_dt::sc_lv<4> & strb, const bool valid);
+        apb_rw read(const apb_rw &req);
+        void write(const apb_rw &req);
 };
 
 #endif /* APB_DRIVER_H_ */

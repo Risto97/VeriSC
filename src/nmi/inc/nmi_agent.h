@@ -17,8 +17,6 @@ class nmi_agent : public uvm::uvm_agent
         nmi_driver* drv;
         nmi_monitor* mon;
 
-        sc_core::sc_event *drv_trig;
-
         nmi::mode_t mode;
 
         nmi_if* vif;

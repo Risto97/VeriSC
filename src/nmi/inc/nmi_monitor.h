@@ -14,8 +14,6 @@ class nmi_monitor : public uvm::uvm_monitor
     public:
         nmi_if* sigs;
 
-        sc_core::sc_event *drv_trig;
-
         sc_core::sc_signal<sc_dt::sc_uint<32>> *mem_addr_old;
         sc_core::sc_signal<bool> *mem_instr_old;
         sc_core::sc_signal<bool> *mem_valid_old;

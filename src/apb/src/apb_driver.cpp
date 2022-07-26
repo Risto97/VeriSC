@@ -42,20 +42,24 @@ void apb_driver::run_phase(uvm::uvm_phase &phase) {
 
     while (1) {
       apb_rw req;
+      apb_rw rsp;
 
       seq_item_port->get_next_item(req);
 
       switch (req.kind_e) {
       case READ:
-        read(req.addr, req.data, req.strb, req.valid);
+        rsp = read(req);
         break;
       case WRITE:
-        write(req.addr, req.data, req.strb, req.valid);
+        write(req);
         break;
       }
 
+      if (req.kind_e == READ) {
+        rsp.set_id_info(req);
+        seq_item_port->put_response(rsp);
+      }
       seq_item_port->item_done();
-      trig.notify();
     }
   } else if (mode == apb::SLAVE) {
     UVM_INFO("CONFIGURED AS SLAVE", "", uvm::UVM_MEDIUM);
@@ -66,39 +70,50 @@ void apb_driver::run_phase(uvm::uvm_phase &phase) {
   }
 }
 
-void apb_driver::read(const sc_dt::sc_lv<32> &addr, sc_dt::sc_lv<32> &data,
-                      const sc_dt::sc_lv<4> &strb, const bool valid) {
-  sigs->paddr = addr;
+apb_rw apb_driver::read(const apb_rw &req) {
+  apb_rw rsp("rsp1");
+  uint32_t retry_count = 0;
+  sigs->paddr = req.addr;
   sigs->pwrite = 0;
-  sigs->pstrb = strb;
-  sigs->psel = valid;
+  sigs->pstrb = req.strb;
+  sigs->psel = req.valid;
   sc_core::wait(sigs->pclk->posedge_event());
-  sigs->penable = valid;
-  sc_core::wait(sigs->pclk->posedge_event());
-  data = sigs->prdata;
+  sigs->penable = req.valid;
+  do {
+    sc_core::wait(sigs->pclk->posedge_event());
+    retry_count++;
+  } while (!sigs->pready && retry_count != max_retry_count);
+  if (retry_count == max_retry_count) {
+    UVM_ERROR("SLAVE STALLED", "SLAVE HAS STALLED");
+    rsp.valid = false;
+  } else
+    rsp.valid = true;
+  rsp.data = sigs->prdata;
+  rsp.addr = req.addr;
+  rsp.kind_e = req.kind_e;
+
   sigs->psel = 0;
   sigs->penable = 0;
+
+  return rsp;
 }
 
-void apb_driver::write(const sc_dt::sc_lv<32> &addr,
-                       const sc_dt::sc_lv<32> &data,
-                       const sc_dt::sc_lv<4> &strb, const bool valid) {
-  uint32_t retry_count=0;
-  sigs->paddr = addr;
-  sigs->pwdata = data;
-  sigs->pstrb = strb;
+void apb_driver::write(const apb_rw &req) {
+  uint32_t retry_count = 0;
+  sigs->paddr = req.addr;
+  sigs->pwdata = req.data;
+  sigs->pstrb = req.strb;
   sigs->pwrite = 1;
-  sigs->psel = valid;
+  sigs->psel = req.valid;
   sc_core::wait(sigs->pclk->posedge_event());
-  sigs->penable = valid;
-  do{
-      sc_core::wait(sigs->pclk->posedge_event());
-      retry_count++;
-  }
-  while(!sigs->pready && retry_count != max_retry_count);
-  if(retry_count == max_retry_count)
-      UVM_ERROR("SLAVE STALLED", "SLAVE HAS STALLED");
-  
+  sigs->penable = req.valid;
+  do {
+    sc_core::wait(sigs->pclk->posedge_event());
+    retry_count++;
+  } while (!sigs->pready && retry_count != max_retry_count);
+  if (retry_count == max_retry_count)
+    UVM_ERROR("SLAVE STALLED", "SLAVE HAS STALLED");
+
   sigs->psel = 0;
   sigs->penable = 0;
 }

@@ -18,7 +18,7 @@ void env::build_phase(uvm::uvm_phase &phase) {
 
   apb_ag = new apb_agent("apb_agent_slave");
   uvm::uvm_config_db<int>::set(this, "apb_agent_slave", "is_active",
-                               uvm::UVM_ACTIVE);
+                               !uvm::UVM_ACTIVE);
   uvm::uvm_config_db<apb::mode_t>::set(this, "apb_agent_slave", "mode",
                                        apb::SLAVE);
   uvm::uvm_config_db<Apb_if *>::set(this, "apb_agent_slave", "vif", apb_vif);

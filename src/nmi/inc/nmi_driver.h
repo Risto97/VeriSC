@@ -14,7 +14,6 @@ class nmi_driver : public uvm::uvm_driver<nmi_rw>
     public:
         UVM_COMPONENT_UTILS(nmi_driver);
 
-        sc_core::sc_event trig;
         nmi_if* sigs;
 
         nmi::mode_t mode;
@@ -26,9 +25,9 @@ class nmi_driver : public uvm::uvm_driver<nmi_rw>
         virtual void run_phase(uvm::uvm_phase & phase);
 
     private:
-        void write(const sc_dt::sc_lv<32> & addr, const sc_dt::sc_lv<32> & data, const sc_dt::sc_lv<4> & strb, const bool valid);
-        void read(const sc_dt::sc_lv<32> & addr, sc_dt::sc_lv<32> & data, const bool valid);
-        void read_insn(const sc_dt::sc_lv<32> & addr, sc_dt::sc_lv<32> & data, const bool valid);
+        void write(const nmi_rw req);
+        nmi_rw read(const nmi_rw req);
+        nmi_rw read_insn(const nmi_rw req);
 };
 
 #endif /* NMI_DRIVER_H_ */

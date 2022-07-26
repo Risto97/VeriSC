@@ -61,6 +61,4 @@ void nmi_agent::connect_phase(uvm::uvm_phase& phase)
     if (get_is_active() == uvm::UVM_ACTIVE) {
         drv->seq_item_port.connect(sqr->seq_item_export);
     }
-    drv_trig = &(drv->trig);
-    mon->drv_trig = drv_trig;
 }
