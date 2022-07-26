@@ -17,6 +17,7 @@ class apb_if : public sc_core::sc_module {
         sc_core::sc_signal<sc_dt::sc_uint<DATA_WIDTH>> prdata;
         sc_core::sc_signal<sc_dt::sc_uint<DATA_WIDTH/8>> pstrb;
         sc_core::sc_signal<sc_dt::sc_uint<DATA_WIDTH>> pwdata;
+        sc_core::sc_signal<bool>  pslverr;
 
         apb_if(const sc_core::sc_module_name & name, sc_core::sc_clock *clk_in) :
             sc_module(name),
@@ -27,7 +28,8 @@ class apb_if : public sc_core::sc_module {
             pwrite("pwrite"),
             prdata("prdata"),
             pstrb("pstrb"),
-            pwdata("pwdata") {
+            pwdata("pwdata"),
+            pslverr("pslverr"){
         pclk = clk_in;
 
     }

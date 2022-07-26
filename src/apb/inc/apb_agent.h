@@ -20,6 +20,7 @@ class apb_agent : public uvm::uvm_agent
         apb_monitor* mon;
 
         apb::mode_t mode;
+        uint32_t max_retry_count;
 
         Apb_if* vif;
 

@@ -56,6 +56,11 @@ void apb_agent::build_phase(uvm::uvm_phase& phase)
     }
     uvm::uvm_config_db<int>::set(this, "drv", "mode", mode);
 
+    if(!uvm::uvm_config_db<uint32_t>::get(this, "", "max_retry_count", max_retry_count)){
+        UVM_INFO("APB", "No max_retry defined, setting to 1", uvm::UVM_LOW);
+        max_retry_count = 1;
+    }
+
 
 }
 

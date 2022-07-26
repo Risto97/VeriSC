@@ -23,6 +23,7 @@ class apb_driver : public uvm::uvm_driver<apb_rw>
         Apb_if* sigs;
 
         apb::mode_t mode;
+        uint32_t max_retry_count;
 
 
         apb_driver(uvm::uvm_component_name name);
