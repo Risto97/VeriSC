@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(APB_lib VERSION 1.0)
-
- message(STATUS "APB CXX STANDARD ${CMAKE_CXX_STANDARD}")
+project(I2C_lib VERSION 1.0)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 # set(CMAKE_FIND_DEBUG_MODE 1)
@@ -9,6 +7,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -33,15 +33,15 @@ endif()
 
 # Create a new library
 add_library(${PROJECT_NAME}
-            inc/apb.h
-            inc/apb_if.h
-            inc/apb_modes.h
-            inc/apb_agent.h
-            inc/apb_driver.h
-            inc/apb_monitor.h
-            inc/apb_sequence.h
-            inc/apb_sequencer.h
-            inc/apb_rw.h
+            inc/i2c.h
+            inc/i2c_if.h
+            inc/i2c_agent.h
+            inc/i2c_driver.h
+            inc/i2c_monitor.h
+            inc/i2c_modes.h
+            # inc/i2c_sequence.h
+            inc/i2c_sequencer.h
+            inc/i2c_rw.h
             inc/univ_subscriber.h
             )# SCT Source file that needs to be compiled
 
@@ -52,11 +52,12 @@ target_sources(${PROJECT_NAME}
                 PRIVATE ${SCT_SOURCES}
 
                 # ENV SOURCES
-                PRIVATE "src/apb_agent.cpp"
-                PRIVATE "src/apb_driver.cpp"
-                PRIVATE "src/apb_monitor.cpp"
-                PRIVATE "src/apb_sequence.cpp"
-                PRIVATE "src/apb_rw.cpp"
+                PRIVATE "src/i2c_agent.cpp"
+                PRIVATE "src/i2c_driver.cpp"
+                PRIVATE "src/i2c_monitor.cpp"
+                # PRIVATE "src/i2c_sequence.cpp"
+                PRIVATE "src/i2c_rw.cpp"
+                PRIVATE "src/i2c_if.cpp"
                 )
 
 # Add SCV directory with libscv.so to path

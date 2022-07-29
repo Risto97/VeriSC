@@ -3,7 +3,6 @@
 
 #include "apb_if.h"
 #include "apb_rw.h"
-#include "apb_config.h"
 #include "apb_driver.h"
 #include "apb_monitor.h"
 #include "apb_sequencer.h"

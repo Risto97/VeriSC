@@ -71,7 +71,7 @@ void apb_driver::run_phase(uvm::uvm_phase &phase) {
 }
 
 apb_rw apb_driver::read(const apb_rw &req) {
-  apb_rw rsp("rsp1");
+  apb_rw rsp("APB read from driver");
   uint32_t retry_count = 0;
   sigs->paddr = req.addr;
   sigs->pwrite = 0;
