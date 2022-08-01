@@ -28,9 +28,10 @@ if (NOT SystemCLanguage_FOUND)
     message(FATAL_ERROR "SystemC not found")
 endif()
 
+set(LIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 
 # Create a new library
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} OBJECT
             inc/nmi.h
             inc/nmi_if.h
             inc/nmi_modes.h
@@ -85,3 +86,4 @@ install(TARGETS ${PROJECT_NAME}
   )
 
 
+set(LIB_INCLUDE_DIR ${LIB_INCLUDE_DIR} PARENT_SCOPE)

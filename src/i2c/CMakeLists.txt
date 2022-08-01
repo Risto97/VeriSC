@@ -30,9 +30,10 @@ if (NOT SystemCLanguage_FOUND)
     message(FATAL_ERROR "SystemC not found")
 endif()
 
+set(LIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 
 # Create a new library
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} OBJECT
             inc/i2c.h
             inc/i2c_if.h
             inc/i2c_agent.h
@@ -85,3 +86,6 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME}
     DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   )
+
+# EXPORT VARIABLES TO PARENT
+set(LIB_INCLUDE_DIR ${LIB_INCLUDE_DIR} PARENT_SCOPE)

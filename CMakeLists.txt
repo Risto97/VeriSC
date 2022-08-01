@@ -10,11 +10,26 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # set(CMAKE_FIND_DEBUG_MODE 1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include("cmake/find_systemc.cmake")
+
 include(GNUInstallDirs)
 
 configure_file(EnvConfig.h.in EnvConfig.h)
 
 add_subdirectory(src)
+
+set(SCT_DIR "$ENV{SCT_HOME}/components/common/sctcommon/")
+list(APPEND EXTRA_SOURCES "${SCT_DIR}/sct_property.cpp")
+
+add_library(${PROJECT_NAME}
+    $<TARGET_OBJECTS:APB_lib>
+    $<TARGET_OBJECTS:NMI_lib>
+    $<TARGET_OBJECTS:I2C_lib>
+    ${EXTRA_SOURCES}
+    )
+target_link_libraries(${PROJECT_NAME}
+            PRIVATE SystemC::systemc
+            )
 
 set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 
@@ -29,6 +44,10 @@ configure_package_config_file(
 install(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/SC_UVM_envConfig.cmake"
   DESTINATION "${config_install_dir}"
+  )
+  
+install(TARGETS ${PROJECT_NAME}
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   )
 
 # uninstall target

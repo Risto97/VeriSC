@@ -15,7 +15,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS "-DNDEBUG")
+set(CMAKE_CXX_FLAGS "-DNDEBUG -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
@@ -30,20 +30,10 @@ if (NOT SystemCLanguage_FOUND)
     message(FATAL_ERROR "SystemC not found")
 endif()
 
+set(LIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
 
 # Create a new library
-add_library(${PROJECT_NAME}
-            inc/apb.h
-            inc/apb_if.h
-            inc/apb_modes.h
-            inc/apb_agent.h
-            inc/apb_driver.h
-            inc/apb_monitor.h
-            inc/apb_sequence.h
-            inc/apb_sequencer.h
-            inc/apb_rw.h
-            inc/univ_subscriber.h
-            )# SCT Source file that needs to be compiled
+add_library(${PROJECT_NAME} OBJECT)
 
 # SCT Source file that needs to be compiled
 set(SCT_DIR "$ENV{SCT_HOME}/components/common/sctcommon/")
@@ -72,7 +62,7 @@ target_include_directories(${PROJECT_NAME}
                 PRIVATE "${SCT_DIR}"
 
                 # ENV INCLUDES
-                PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/inc"
+                PUBLIC ${LIB_INCLUDE_DIR}
                 )
 
 target_link_libraries(${PROJECT_NAME} 
@@ -84,3 +74,6 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME}
     DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   )
+
+# EXPORT VARIABLES TO PARENT
+set(LIB_INCLUDE_DIR ${LIB_INCLUDE_DIR} PARENT_SCOPE)
