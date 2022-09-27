@@ -45,7 +45,6 @@ target_sources(${PROJECT_NAME}
                 PRIVATE "src/apb_agent.cpp"
                 PRIVATE "src/apb_driver.cpp"
                 PRIVATE "src/apb_monitor.cpp"
-                PRIVATE "src/apb_sequence.cpp"
                 PRIVATE "src/apb_rw.cpp"
                 )
 
