@@ -15,6 +15,7 @@ class apb_rw : public uvm::uvm_sequence_item {
         sc_dt::sc_lv<32> data;
         sc_dt::sc_lv<4>  strb;
         apb_rw_enum kind_e;
+        bool slv_err;
         bool valid;
 
         UVM_OBJECT_UTILS(apb_rw);
