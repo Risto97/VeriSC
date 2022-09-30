@@ -9,7 +9,7 @@ endif()
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(USE_VERILATOR True)
@@ -20,7 +20,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # Find SystemC using SystemC's CMake integration
-set(CMAKE_PREFIX_PATH "${SYSTEMC}")
+set(CMAKE_PREFIX_PATH "${SYSTEMC}" "${SYSTEMC}/build")
 find_package(SystemCLanguage CONFIG REQUIRED)
 if (NOT SystemCLanguage_FOUND)
     message(FATAL_ERROR "SystemC not found")

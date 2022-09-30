@@ -5,7 +5,7 @@ project(NMI_lib VERSION 1.0)
 # set(CMAKE_FIND_DEBUG_MODE 1)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(NOT CMAKE_BUILD_TYPE)
