@@ -103,6 +103,7 @@ void apb_monitor::run_monitor(){
         tr->kind_e = (sigs->pwrite == 1) ? WRITE : READ;
         tr->addr = sigs->paddr;
         tr->strb = sigs->pstrb;
+        tr->slv_err = sigs->pslverr;
         tr->valid = true;
 
         tr->data = (tr->kind_e == READ) ? sigs->prdata : sigs->pwdata;
