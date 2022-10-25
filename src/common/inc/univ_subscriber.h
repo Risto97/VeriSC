@@ -15,7 +15,9 @@ public:
 
   univ_subscriber(uvm::uvm_component_name name)
     : uvm::uvm_subscriber<packet_type>(name){
-      uvm::uvm_config_db<uvm::uvm_object*>::get(this, "", "sb", obj);
+      if(!uvm::uvm_config_db<uvm::uvm_object*>::get(this, "", "sb", obj)){
+          UVM_FATAL("Universal subscriber", "Scoreboard not registered in database for universal subscriber");
+      }
 
       sb = dynamic_cast<sb_t *>(obj);
   };
