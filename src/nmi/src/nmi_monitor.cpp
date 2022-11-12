@@ -1,4 +1,4 @@
-#include "sct_assert.h"
+// #include "sct_assert.h"
 #include <string>
 #include <systemc>
 #include <uvm>
@@ -56,13 +56,13 @@ void nmi_monitor::connect_phase(uvm::uvm_phase & phase){
 }
 
 void nmi_monitor::static_assertions(){
-    SCT_ASSERT(sigs->mem_valid , SCT_TIME(0), check_wstrb(sigs->mem_wstrb.read()) , sigs->clk->posedge_event());  
-    SCT_ASSERT(sigs->mem_instr , SCT_TIME(0), sigs->mem_wstrb.read() == 0 , sigs->clk->posedge_event());  
-    SCT_ASSERT((sigs->mem_valid && !sigs->mem_ready), SCT_TIME(1), ((sigs->mem_addr  == *mem_addr_old) &&
-               (sigs->mem_instr == *mem_instr_old) && (sigs->mem_wdata == *mem_wdata_old) &&
-               (sigs->mem_wstrb == *mem_wstrb_old)), sigs->clk->posedge_event());  
-    SCT_ASSERT(sigs->mem_valid && !sigs->mem_ready , SCT_TIME(1), sigs->mem_valid, sigs->clk->posedge_event());  
-
+    // SCT_ASSERT(sigs->mem_valid , SCT_TIME(0), check_wstrb(sigs->mem_wstrb.read()) , sigs->clk->posedge_event());  
+    // SCT_ASSERT(sigs->mem_instr , SCT_TIME(0), sigs->mem_wstrb.read() == 0 , sigs->clk->posedge_event());  
+    // SCT_ASSERT((sigs->mem_valid && !sigs->mem_ready), SCT_TIME(1), ((sigs->mem_addr  == *mem_addr_old) &&
+    //            (sigs->mem_instr == *mem_instr_old) && (sigs->mem_wdata == *mem_wdata_old) &&
+    //            (sigs->mem_wstrb == *mem_wstrb_old)), sigs->clk->posedge_event());  
+    // SCT_ASSERT(sigs->mem_valid && !sigs->mem_ready , SCT_TIME(1), sigs->mem_valid, sigs->clk->posedge_event());  
+    //
     // SCT_ASSERT(sigs->mem_valid && !sigs->mem_ready, SCT_TIME(1), sigs->mem_addr  == *mem_addr_old, sigs->clk->posedge_event());  
     // SCT_ASSERT(sigs->mem_valid && !sigs->mem_ready, SCT_TIME(1), sigs->mem_instr == *mem_instr_old, sigs->clk->posedge_event());  
     // SCT_ASSERT(sigs->mem_valid && !sigs->mem_ready, SCT_TIME(1), sigs->mem_wdata == *mem_wdata_old, sigs->clk->posedge_event());  

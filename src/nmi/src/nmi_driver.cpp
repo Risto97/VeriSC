@@ -14,6 +14,7 @@ nmi_driver::nmi_driver(uvm::uvm_component_name name)
 void nmi_driver::build_phase(uvm::uvm_phase &phase) {
   uvm::uvm_driver<nmi_rw>::build_phase(phase);
 
+  UVM_INFO(this->get_name(), "Build phase", uvm::UVM_MEDIUM);
   nmi_agent *agent = dynamic_cast<nmi_agent *>(get_parent());
   if (agent) {
     sigs = agent->vif;
@@ -33,11 +34,14 @@ void nmi_driver::run_phase(uvm::uvm_phase &phase) {
   sigs->mem_valid = 0;
   sigs->mem_instr = 0;
 
+  UVM_INFO(this->get_name(), "Starting run phase", uvm::UVM_MEDIUM);
   while (1) {
     nmi_rw req;
     nmi_rw rsp;
 
+  UVM_INFO(this->get_name(), "Getting item", uvm::UVM_MEDIUM);
     seq_item_port->get_next_item(req);
+  UVM_INFO(this->get_name(), "Got item", uvm::UVM_MEDIUM);
 
     std::string str = req.convert2string();
 

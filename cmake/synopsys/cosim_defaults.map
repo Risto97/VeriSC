@@ -1,0 +1,147 @@
+####################################################################
+# Copyright 2003 Synopsys, Inc.   All Rights Reserved
+# CoCentric (R) System Studio
+#
+# This is a file used solely by the ccss_cosim tool of CoCentric System
+# Studio.  It's purpose is to provide a set of default mappings
+# between the SystemC and Verilog/VHDL port datatypes for HDL Wrapper
+# models.
+#
+# This file is one of three files read by ccss_cosim to establish the
+# mapping rules from language domain to language domain.  The order of
+# the files to read is the following:
+#
+# 1.  $VCS_SYSTEMC_ROOT/include/cosim/cosim_defaults.map (this file)
+# 2.  $HOME/.synopsys_ccss/cosim_defaults.map
+# 3.  ./cosim_defaults.map
+#
+# This allows for the setting of default mappings for an installation
+# tree, a user's account, or for a particular design.  Rules in the
+# last read file override any previous established rules.  Rules that
+# aren't defined in the last read file remain the way they are from
+# the previously read file.
+#
+# When using the ccss_cosim tool to generate a wrapper model for
+# a given source model, the wrapper model's language datatypes are
+# referred to as the target datatypes and the given source model's
+# language datatypes are referred to as the source datatypes.
+#
+# For instance:
+#
+# Example 1:  'ccss_cosim -d arch ... fir.vhd:fir'
+# This example has a source datatype of VHDL and a target datatype
+# of SystemC.
+#
+# Example 2:  'ccss_cosim -d arch ... fir.v:fir'
+# This example has a source datatype of Verilog and a target datatype
+# of SystemC.
+#
+# Example 3:  'ccss_cosim -d arch ... fir.cpp:fir -vcs'
+# This example has a source datatype of SystemC and a target datatype
+# of Verilog.
+#
+# Example 4:  'ccss_cosim -d arch ... fir.cpp:fir -scirocco'
+# This example has a source datatype of SystemC and a target datatype
+# of VHDL.
+#
+# It is important to know the difference between the source
+# datatype and the target datatype when defining the mapping
+# from one domain language to another domain language.
+#
+# The format for the rules in this file is:
+#
+#  hdl_language 	size 	hdl_datatype 	systemc_datatype
+#
+# Notice the hdl_datatype and systemc_datatype are not referred
+# to as the source and target.  This is because the source model's
+# language varies (read above for more details on this).  The
+# hdl_language is either Verilog or VHDL and the hdl_datatype is
+# the datatype for the given hdl_language.  size refers to the
+# size in bits of the datatype to map to.  systemc_datatype refers
+# to the SystemC datatype.
+#
+# NOTE: The ordering of the rules is crucial with the first rule
+# definition taking precedence over other rule definitions.
+#
+#  Example:  VHDL 3 std_logic_vector int
+#            VHDL 3 std_logic_vector char
+#
+# In the previous example, the first 3 bit mapping from
+# std_logic_vector to int is the chosen mapping for VHDL
+# std_logic_vector datatypes of size 3.
+#
+# If the size is '*', then this indicates that for all other sizes
+# of the source datatype that are not defined in this file, that this
+# rule applies.
+#
+#  Example:  VHDL 8 std_logic_vector sc_int
+#            VHDL * std_logic_vector sc_lv
+#            VHDL * signed           sc_int
+#
+# This example provides an example for two different sources.  If
+# the source model is VHDL and the port type is std_logic_vector,
+# a size of 8 will map to an sc_int, whereas any other size will map
+# to an sc_lv.  If the source model is SystemC and the port type is
+# sc_int, a size of 8 will map to a std_logic_vector, whereas any
+# other size will map to a signed datatype.
+#
+# '*' rules in a file override all bit sizes of rules defined in
+# previously read files.
+#
+####################################################################
+
+##################################################
+# Mappings between SystemC and Verilog datatypes
+##################################################
+Verilog  * bit_vector       sc_uint
+Verilog  1 bit              bool
+Verilog  * bit_vector       int
+Verilog  * signed           int
+Verilog  1 bit              sc_logic
+Verilog  1 bit              sc_bit
+Verilog  * bit_vector       char
+Verilog  * bit_vector       uchar
+Verilog  * bit_vector       short
+Verilog  * bit_vector       ushort
+Verilog  * bit_vector       uint
+Verilog  * bit_vector       long
+Verilog  * bit_vector       ulong
+Verilog  * bit_vector       longlong
+Verilog  * bit_vector       ulonglong
+Verilog  * bit_vector       sc_int
+Verilog  * bit_vector       sc_uint
+Verilog  * bit_vector       sc_bigint
+Verilog  * bit_vector       sc_lv
+Verilog  * bit_vector       sc_biguint
+Verilog  1 real             double
+Verilog  1 wreal            sc_wreal
+
+##################################################
+# Mappings between the SystemC and VHDL datatypes
+##################################################
+VHDL     1 std_logic        sc_logic
+VHDL     * std_logic_vector sc_lv
+VHDL     * bit_vector       sc_bv
+VHDL     1 std_logic        bool
+VHDL     1 bit              bool
+VHDL     1 std_logic        sc_bit
+VHDL     * std_logic_vector char
+VHDL     * std_logic_vector uchar
+VHDL     * std_logic_vector short
+VHDL     * std_logic_vector ushort
+VHDL     * std_logic_vector uint
+VHDL     * unsigned         uint
+VHDL     * std_logic_vector int
+VHDL     * signed           int
+VHDL     * std_logic_vector long
+VHDL     * std_logic_vector ulong
+VHDL     * std_logic_vector longlong
+VHDL     * std_logic_vector ulonglong
+VHDL     * std_logic_vector sc_bv
+VHDL     * std_logic_vector sc_int
+VHDL     * std_logic_vector sc_uint
+VHDL     * std_logic_vector sc_bigint
+VHDL     * std_logic_vector sc_biguint
+VHDL     1 std_ulogic        sc_logic
+VHDL     * std_ulogic_vector sc_lv
+VHDL     1 real              double

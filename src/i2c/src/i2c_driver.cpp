@@ -18,6 +18,8 @@ void i2c_driver::build_phase(uvm::uvm_phase &phase) {
   uvm::uvm_driver<i2c_rw>::build_phase(phase);
 
   i2c_agent *agent = dynamic_cast<i2c_agent *>(get_parent());
+
+  UVM_INFO("i2c DRIVER build PHASE2", "", uvm::UVM_MEDIUM);
   if (agent) {
     sigs = agent->vif;
     mode = agent->mode;

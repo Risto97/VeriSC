@@ -1,4 +1,4 @@
-#include "sct_assert.h"
+// #include "sct_assert.h"
 #include <string>
 #include <systemc>
 #include <uvm>
@@ -62,18 +62,18 @@ void apb_monitor::connect_phase(uvm::uvm_phase & phase){
 }
 
 void apb_monitor::static_assertions(){
-    SCT_ASSERT(!*psel_old && sigs->psel, SCT_TIME(1), sigs->penable, sigs->pclk->posedge_event());
-    SCT_ASSERT(sigs->psel && !sigs->pready, SCT_TIME(1), sigs->psel, sigs->pclk->posedge_event());
-    SCT_ASSERT(sigs->penable && !sigs->pready, SCT_TIME(1), sigs->penable, sigs->pclk->posedge_event());
-    SCT_ASSERT(!sigs->pwrite && sigs->psel, SCT_TIME(0), sigs->pstrb.read() == 0, sigs->pclk->posedge_event());
-
-    SCT_ASSERT(sigs->psel && !sigs->pready, SCT_TIME(1), (sigs->paddr == *paddr_old) && 
-              (sigs->pwrite == *pwrite_old) && (sigs->pstrb == *pstrb_old) &&
-              (sigs->pwdata == *pwdata_old), sigs->pclk->posedge_event());
-
-    SCT_ASSERT(true, SCT_TIME(0), check_onehot_or_zero(sigs->psel.read()), sigs->pclk->posedge_event());
-    SCT_ASSERT(true, SCT_TIME(0), check_onehot_or_zero(sigs->penable.read()), sigs->pclk->posedge_event());
-
+    // SCT_ASSERT(!*psel_old && sigs->psel, SCT_TIME(1), sigs->penable, sigs->pclk->posedge_event());
+    // SCT_ASSERT(sigs->psel && !sigs->pready, SCT_TIME(1), sigs->psel, sigs->pclk->posedge_event());
+    // SCT_ASSERT(sigs->penable && !sigs->pready, SCT_TIME(1), sigs->penable, sigs->pclk->posedge_event());
+    // SCT_ASSERT(!sigs->pwrite && sigs->psel, SCT_TIME(0), sigs->pstrb.read() == 0, sigs->pclk->posedge_event());
+    //
+    // SCT_ASSERT(sigs->psel && !sigs->pready, SCT_TIME(1), (sigs->paddr == *paddr_old) && 
+    //           (sigs->pwrite == *pwrite_old) && (sigs->pstrb == *pstrb_old) &&
+    //           (sigs->pwdata == *pwdata_old), sigs->pclk->posedge_event());
+    //
+    // SCT_ASSERT(true, SCT_TIME(0), check_onehot_or_zero(sigs->psel.read()), sigs->pclk->posedge_event());
+    // SCT_ASSERT(true, SCT_TIME(0), check_onehot_or_zero(sigs->penable.read()), sigs->pclk->posedge_event());
+    //
 }
 
 void apb_monitor::dynamic_assertions(){

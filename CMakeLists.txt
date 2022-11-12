@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS "-DNDEBUG -fPIC")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-include("cmake/find_systemc.cmake")
+# include("cmake/find_systemc.cmake")
 
 include(GNUInstallDirs)
 
@@ -22,18 +22,19 @@ configure_file(EnvConfig.h.in EnvConfig.h)
 
 add_subdirectory(src)
 
-set(SCT_DIR "$ENV{SCT_HOME}/components/common/sctcommon/")
-list(APPEND EXTRA_SOURCES "${SCT_DIR}/sct_property.cpp")
+# set(SCT_DIR "$ENV{SCT_HOME}/components/common/sctcommon/")
+# list(APPEND EXTRA_SOURCES "${SCT_DIR}/sct_property.cpp")
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
     $<TARGET_OBJECTS:APB_lib>
     $<TARGET_OBJECTS:NMI_lib>
     $<TARGET_OBJECTS:I2C_lib>
     ${EXTRA_SOURCES}
     )
-target_link_libraries(${PROJECT_NAME}
-            PRIVATE SystemC::systemc
-            )
+
+# target_link_libraries(${PROJECT_NAME}
+            # PRIVATE SystemC::systemc
+            # )
 
 set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 

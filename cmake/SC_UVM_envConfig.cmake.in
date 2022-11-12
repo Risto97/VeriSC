@@ -45,35 +45,22 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # Find SystemC using SystemC's CMake integration
-set(CMAKE_PREFIX_PATH "${SYSTEMC}" "${SYSTEMC}/build")
-find_package(SystemCLanguage CONFIG REQUIRED)
-if (NOT SystemCLanguage_FOUND)
-    message(FATAL_ERROR "SystemC not found")
-endif()
+# set(CMAKE_PREFIX_PATH "${SYSTEMC}" "${SYSTEMC}/build")
+# find_package(SystemCLanguage CONFIG REQUIRED)
+# if (NOT SystemCLanguage_FOUND)
+#     message(FATAL_ERROR "SystemC not found")
+# endif()
 
-set(@PROJECT_NAME@_object   "@PROJECT_BINARY_DIR@/lib@PROJECT_NAME@.a" )
-list(APPEND SC_UVM_env_TOOL_LIBS "$ENV{SCV}/objdir/src/scv/.libs/libscv.so")
-list(APPEND SC_UVM_env_TOOL_LIBS "$ENV{SYSTEMC_UVM}/lib-linux64/libuvm-systemc.so")
-list(APPEND SC_UVM_env_TOOL_LIBS SystemC::systemc)
 
-list(APPEND SC_UVM_env_libs ${SC_UVM_env_object})
-list(APPEND SC_UVM_env_libs ${SC_UVM_env_TOOL_LIBS})
-
+set(@PROJECT_NAME@_object   "@PROJECT_BINARY_DIR@/lib@PROJECT_NAME@.so" )
 set(@PROJECT_NAME@_libs_include_dirs "@LIB_INCLUDE_DIRS@" )
-list(APPEND SC_UVM_env_TOOL_INC_DIRS "$ENV{SYSTEMC_UVM}/include")
-list(APPEND SC_UVM_env_TOOL_INC_DIRS "$ENV{SCV}/src")
-list(APPEND SC_UVM_env_TOOL_INC_DIRS "$ENV{FC4SC}/includes")
-list(APPEND SC_UVM_env_TOOL_INC_DIRS "$ENV{SCT_HOME}/components/common/sctcommon/")
 
-
+list(APPEND SC_UVM_env_libs ${@PROJECT_NAME@_object})
 list(APPEND SC_UVM_env_include_dirs ${SC_UVM_env_libs_include_dirs})
-list(APPEND SC_UVM_env_include_dirs ${SC_UVM_env_TOOL_INC_DIRS})
-if (USE_VERILATOR)
-    list(APPEND SC_UVM_env_include_dirs "${VERILATOR_ROOT}/include")
-endif()
 
 # Custom makefile targets
 
+include("@PROJECT_SOURCE_DIR@/cmake/verilator.cmake")
 # Run the simulation executable after build with make run
 add_custom_target(run
                 COMMAND ${PROJECT_NAME}

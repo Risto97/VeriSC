@@ -11,9 +11,9 @@ typedef enum {
 
 class apb_rw : public uvm::uvm_sequence_item {
     public:
-        sc_dt::sc_lv<32> addr;
-        sc_dt::sc_lv<32> data;
-        sc_dt::sc_lv<4>  strb;
+        sc_dt::sc_bv<32> addr;
+        sc_dt::sc_bv<32> data;
+        sc_dt::sc_bv<4>  strb;
         apb_rw_enum kind_e;
         bool slv_err;
         bool valid;

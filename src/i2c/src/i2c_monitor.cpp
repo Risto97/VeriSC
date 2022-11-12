@@ -1,4 +1,4 @@
-#include "sct_assert.h"
+// #include "sct_assert.h"
 #include <cstdint>
 #include <ios>
 #include <sstream>
