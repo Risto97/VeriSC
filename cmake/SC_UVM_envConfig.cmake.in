@@ -53,14 +53,16 @@ find_package(Threads REQUIRED)
 
 
 set(@PROJECT_NAME@_object   "@PROJECT_BINARY_DIR@/lib@PROJECT_NAME@.so" )
-set(@PROJECT_NAME@_libs_include_dirs "@LIB_INCLUDE_DIRS@" )
+# set(@PROJECT_NAME@_libs_include_dirs "@LIB_INCLUDE_DIRS@" )
 
+set(SC_UVM_lib_name @PROJECT_NAME@)
 list(APPEND SC_UVM_env_libs ${@PROJECT_NAME@_object})
-list(APPEND SC_UVM_env_include_dirs ${SC_UVM_env_libs_include_dirs})
+# list(APPEND SC_UVM_env_include_dirs ${SC_UVM_env_libs_include_dirs})
 
 # Custom makefile targets
 
 include("@PROJECT_SOURCE_DIR@/cmake/verilator.cmake")
+include("@PROJECT_SOURCE_DIR@/cmake/synopsys/vcs.cmake")
 # Run the simulation executable after build with make run
 add_custom_target(run
                 COMMAND ${PROJECT_NAME}
