@@ -19,12 +19,12 @@ get_target_property(ENV_COMP_OPT ${PROJECT_NAME} INTERFACE_COMPILE_OPTIONS)
 find_library(sc_uvm_lib uvm-systemc PATHS "$ENV{VCS_SYSTEMC_UVM}/*" NO_DEFAULT_PATH)
 find_library(sc_uvm_env_lib SC_UVM_env PATHS "$ENV{VCS_SC_UVM_ENV_HOME}/*" NO_DEFAULT_PATH)
 
-list(APPEND EXTRA_LIBS 
+list(APPEND VCS_EXTRA_LIBS 
             ${sc_uvm_lib}
             ${sc_uvm_env_lib}
             )
 
-list(APPEND EXTRA_INCLUDES 
+list(APPEND VCS_EXTRA_INCLUDES 
             "$ENV{VCS_SYSTEMC}/include"
             "$ENV{VCS_SYSTEMC_UVM}/include"
             "$ENV{VCS_FC4SC}/includes"
@@ -34,9 +34,9 @@ list(APPEND EXTRA_INCLUDES
             "$ENV{VCS_SC_UVM_ENV_HOME}/src/i2c/inc"
             "$ENV{VCS_SC_UVM_ENV_HOME}/src/common/inc"
             ) #TODO Fix SC_UVM_HOME includes
-list(APPEND EXTRA_INCLUDES ${ENV_INC_DIR})
+list(APPEND VCS_EXTRA_INCLUDES ${ENV_INC_DIR})
 
-string (REPLACE ";" " -I" CFLAGS_INC_DIRS "${EXTRA_INCLUDES}")
+string (REPLACE ";" " -I" CFLAGS_INC_DIRS "${VCS_EXTRA_INCLUDES}")
 set(CFLAGS_INC_DIRS "-I${CFLAGS_INC_DIRS}")
 message(STATUS "VCS Include Directories: ${CFLAGS_INC_DIRS}")
 
