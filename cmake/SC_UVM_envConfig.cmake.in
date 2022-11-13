@@ -64,10 +64,10 @@ list(APPEND SC_UVM_env_libs ${@PROJECT_NAME@_object})
 include("@PROJECT_SOURCE_DIR@/cmake/verilator.cmake")
 include("@PROJECT_SOURCE_DIR@/cmake/synopsys/vcs.cmake")
 # Run the simulation executable after build with make run
-add_custom_target(run
-                COMMAND ${PROJECT_NAME}
-                DEPENDS ${PROJECT_NAME}
-                )
+# add_custom_target(run
+#                 COMMAND ${PROJECT_NAME}
+#                 DEPENDS ${PROJECT_NAME}
+#                 )
 
 # Open the trace files with gtkwave
 add_custom_target(vcd

@@ -85,4 +85,7 @@ target_link_libraries(verilator_tb PRIVATE
                       verilated_lib  
                       ${EXTRA_LIBS}
                     )
+add_custom_target(run
+                  ${COMMAND} verilator_tb
+                  DEPENDS verilator_tb)
            
