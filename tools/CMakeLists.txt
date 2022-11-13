@@ -70,4 +70,6 @@ ExternalProject_Add(verilator
     INSTALL_COMMAND make install && ${CMAKE_COMMAND} -E copy_directory ${VERILATOR_INSTALL_DIR}/share/verilator/include ${VERILATOR_INSTALL_DIR}/include
     )
 
-configure_file(source.sh.in source.sh)
+configure_file(${PROJECT_SOURCE_DIR}/source.sh.in ${PROJECT_BINARY_DIR}/source.sh)
+set(TAG ${CMAKE_CXX_COMPILER_VERSION})
+configure_file(${PROJECT_SOURCE_DIR}/libs_conf.cmake.in ${PROJECT_BINARY_DIR}/libs_conf_${TAG}.cmake)
