@@ -3,11 +3,20 @@ project(tools_install)
 
 include(ExternalProject)
 
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+		cmake_policy(SET CMP0135 NEW)
+endif()
+
 set(GROUP_INSTALL_DIR ${PROJECT_BINARY_DIR}/installs/${CMAKE_CXX_COMPILER_VERSION})
 
 set(SYSTEMC_VERSION 2.3.3)
 set(SCV_VERSION 2.0.1)
 set(UVM_VERSION 1.0-beta4)
+set(VERILATOR_VERSION 4.228)
+set(FC4SC_VERSION master)
+set(ICSC_COMPILER_VERSION master)
+
+set(ICSC_COMPILER_INSTALL_DIR ${GROUP_INSTALL_DIR}/systemc-compiler-${ICSC_COMPILER_VERSION})
 
 set(SYSTEMC_INSTALL_DIR ${GROUP_INSTALL_DIR}/systemc-${SYSTEMC_VERSION})
 ExternalProject_Add(systemc
@@ -22,17 +31,43 @@ ExternalProject_Add(systemc
     )
 
 set(SCV_INSTALL_DIR ${GROUP_INSTALL_DIR}/scv-${SCV_VERSION})
+set(SCV_SRC_DIR ${PROJECT_BINARY_DIR}/src/scv)
 ExternalProject_Add(scv
     URL https://www.accellera.org/images/downloads/standards/systemc/scv-${SCV_VERSION}.tar.gz
     PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/src/scv/configure --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${SCV_INSTALL_DIR}
+    CONFIGURE_COMMAND autoreconf -fiv ${SCV_SRC_DIR} && ${SCV_SRC_DIR}/configure --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${SCV_INSTALL_DIR}
     DEPENDS systemc
     )
 
 set(UVM_INSTALL_DIR ${GROUP_INSTALL_DIR}/uvm-systemc-${UVM_VERSION})
+set(UVM_SRC_DIR ${PROJECT_BINARY_DIR}/src/uvm-systemc)
 ExternalProject_Add(uvm-systemc
     URL https://www.accellera.org/images/downloads/standards/systemc/uvm-systemc-${UVM_VERSION}.tar.gz
     PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND ${PROJECT_BINARY_DIR}/src/uvm-systemc/configure --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${UVM_INSTALL_DIR}
+    CONFIGURE_COMMAND autoreconf -fiv ${UVM_SRC_DIR} && ${UVM_SRC_DIR}/configure --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${UVM_INSTALL_DIR}
     DEPENDS systemc
     )
+
+set(FC4SC_INSTALL_DIR ${GROUP_INSTALL_DIR}/fc4sc-${FC4SC_VERSION})
+set(FC4SC_SRC_DIR ${PROJECT_BINARY_DIR}/src/fc4sc)
+ExternalProject_Add(fc4sc
+    GIT_REPOSITORY https://github.com/amiq-consulting/fc4sc.git
+    GIT_TAG ${FC4SC_VERSION}
+    PREFIX ${PROJECT_BINARY_DIR}
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory ${FC4SC_SRC_DIR} ${FC4SC_INSTALL_DIR}
+    )
+
+
+set(VERILATOR_INSTALL_DIR ${GROUP_INSTALL_DIR}/verilator-${VERILATOR_VERSION})
+set(VERILATOR_SRC_DIR ${PROJECT_BINARY_DIR}/src/verilator)
+ExternalProject_Add(verilator
+    GIT_REPOSITORY https://github.com/verilator/verilator.git
+    GIT_TAG v${VERILATOR_VERSION}
+    PREFIX ${PROJECT_BINARY_DIR}
+    CONFIGURE_COMMAND  autoconf --output ${VERILATOR_SRC_DIR}/configure ${VERILATOR_SRC_DIR}/configure.ac && ${VERILATOR_SRC_DIR}/configure --prefix=${VERILATOR_INSTALL_DIR}
+    INSTALL_COMMAND make install && ${CMAKE_COMMAND} -E copy_directory ${VERILATOR_INSTALL_DIR}/share/verilator/include ${VERILATOR_INSTALL_DIR}/include
+    )
+
+configure_file(source.sh.in source.sh)

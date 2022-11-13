@@ -9,9 +9,8 @@ message(DEBUG "V_SOURCES from RTL_LIB ${V_SOURCES}")
 find_library(sc_uvm_env_lib SC_UVM_env PATHS "$ENV{SC_UVM_ENV_HOME}/*" NO_DEFAULT_PATH)
 find_library(systemc_lib systemc PATHS "$ENV{SYSTEMC}/*" NO_DEFAULT_PATH)
 find_library(sc_uvm_lib uvm-systemc PATHS "$ENV{SYSTEMC_UVM}/*" NO_DEFAULT_PATH)
-find_library(scv_lib scv PATHS "$ENV{SCV}/objdir/src/scv/.libs/" NO_DEFAULT_PATH)
+find_library(scv_lib scv PATHS "$ENV{SCV}/*" NO_DEFAULT_PATH)
 
-message(STATUS "SYSTEMC:: ${systemc_lib}")
 
 list(APPEND EXTRA_LIBS 
             ${systemc_lib}
@@ -23,6 +22,7 @@ list(APPEND EXTRA_LIBS
 list(APPEND EXTRA_INCLUDES 
             "$ENV{SYSTEMC}/include"
             "$ENV{SYSTEMC_UVM}/include"
+            "$ENV{SCV}/include"
             "$ENV{FC4SC}/includes"
             "$ENV{SCT_HOME}/components/common/sctcommon/"
 
