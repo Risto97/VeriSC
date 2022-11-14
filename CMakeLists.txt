@@ -28,7 +28,7 @@ ExternalProject_Add(uvc
             # GIT_TAG master
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
-            SOURCE_DIR "/tools/work/systemc_uvm_uvc"
+            SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${UVC_INSTALL_DIR}
                 -DCMAKE_INSTALL_LIBDIR=lib-linux64
