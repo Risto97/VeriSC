@@ -1,12 +1,13 @@
 
 set(CMAKE_FIND_DEBUG_MODE True)
-set(CMAKE_FIND_DEBUG_MODE False)
 find_file(file "libs_conf_${CMAKE_CXX_COMPILER_VERSION}.cmake"
-            PATHS "$ENV{SC_UVM_ENV_HOME}/*/*" NO_DEFAULT_PATH)
+    PATHS "${CMAKE_INSTALL_PREFIX}/${CMAKE_CXX_COMPILER_VERSION}" NO_DEFAULT_PATH)
+set(CMAKE_FIND_DEBUG_MODE False)
 
 include(${file})
 
 set(TAG ${CMAKE_CXX_COMPILER_VERSION})
+message(STATUS "LOOKING FOR ${TAG}")
 
 find_library(systemc_lib systemc PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH)
 

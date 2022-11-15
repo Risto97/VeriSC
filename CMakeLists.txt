@@ -10,19 +10,32 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # set(CMAKE_FIND_DEBUG_MODE 1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_FLAGS "-DNDEBUG -fPIC")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-# include("cmake/find_systemc.cmake")
-
-add_subdirectory(tools)
-# add_subdirectory(uvc)
 
 include(ExternalProject)
 
-set(GROUP_INSTALL_DIR ${PROJECT_BINARY_DIR}/installs/${CMAKE_CXX_COMPILER_VERSION})
-set(UVC_INSTALL_DIR ${GROUP_INSTALL_DIR}/uvc/)
+ExternalProject_Add(gcc_install
+            DOWNLOAD_COMMAND ""
+            PREFIX ${PROJECT_BINARY_DIR}
+            SOURCE_DIR "${PROJECT_SOURCE_DIR}/gcc"
+            CMAKE_ARGS
+                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/installs
+            INSTALL_COMMAND ""
+            )
+
+ExternalProject_Add(tools_install
+            DOWNLOAD_COMMAND ""
+            PREFIX ${PROJECT_BINARY_DIR}
+            SOURCE_DIR "${PROJECT_SOURCE_DIR}/tools"
+            DEPENDS gcc_install
+            CMAKE_ARGS
+                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/installs
+                -DCMAKE_CXX_COMPILER=${PROJECT_BINARY_DIR}/installs/gcc-12.2.0/bin/g++ #TODO not correct
+                -DCMAKE_C_COMPILER=${PROJECT_BINARY_DIR}/installs/gcc-12.2.0/bin/gcc
+            )
+
+
+# set(GROUP_INSTALL_DIR ${PROJECT_BINARY_DIR}/installs/${CMAKE_CXX_COMPILER_VERSION})
+# set(UVC_INSTALL_DIR ${GROUP_INSTALL_DIR}/uvc/)
 ExternalProject_Add(uvc
             # GIT_REPOSITORY https://github.com/Risto97/systemc_uvm_uvc.git
             # GIT_TAG master
@@ -30,31 +43,18 @@ ExternalProject_Add(uvc
             PREFIX ${PROJECT_BINARY_DIR}
             SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
             CMAKE_ARGS
-                -DCMAKE_INSTALL_PREFIX=${UVC_INSTALL_DIR}
+                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/installs
                 -DCMAKE_INSTALL_LIBDIR=lib-linux64
                 -DCMAKE_INSTALL_INCLUDEDIR=include
                 -DCMAKE_CXX_STANDARD=17
-            DEPENDS systemc scv fc4sc uvm-systemc
+                -DCMAKE_CXX_COMPILER=${PROJECT_BINARY_DIR}/installs/gcc-12.2.0/bin/g++
+                -DCMAKE_C_COMPILER=${PROJECT_BINARY_DIR}/installs/gcc-12.2.0/bin/gcc
+            DEPENDS gcc_install tools_install
             )
 include(GNUInstallDirs)
 
 configure_file(EnvConfig.h.in EnvConfig.h)
 
-# add_subdirectory(uvc)
-
-# set(SCT_DIR "$ENV{SCT_HOME}/components/common/sctcommon/")
-# list(APPEND EXTRA_SOURCES "${SCT_DIR}/sct_property.cpp")
-
-# add_library(${PROJECT_NAME} SHARED
-#     $<TARGET_OBJECTS:APB_lib>
-#     # $<TARGET_OBJECTS:NMI_lib>
-#     # $<TARGET_OBJECTS:I2C_lib>
-#     ${EXTRA_SOURCES}
-#     )
-
-# target_link_libraries(${PROJECT_NAME}
-            # PRIVATE SystemC::systemc
-            # )
 
 set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 message(STATUS "INSTALL_LIBDIR: ${config_install_dir}")
