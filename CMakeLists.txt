@@ -21,12 +21,12 @@ ExternalProject_Add(gcc_install
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
             SOURCE_DIR ${PROJECT_SOURCE_DIR}/gcc
+            BUILD_ALWAYS 1
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                 -DGCC_VERSION=${GCC_VERSION}
                 -DCOMPILE_GCC=${COMPILE_GCC}
                 -DDOWNLOAD_GCC_BINARY=${DOWNLOAD_GCC_BINARY}
-            INSTALL_COMMAND ""
             )
 
 set(INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX}/osci)
@@ -34,12 +34,12 @@ ExternalProject_Add(tools_install
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
             SOURCE_DIR "${PROJECT_SOURCE_DIR}/tools"
-            DEPENDS gcc_install
             BUILD_ALWAYS 1
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}
                 -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
                 -DCMAKE_C_COMPILER=${C_COMPILER}
+            DEPENDS gcc_install
             )
 
 

@@ -16,6 +16,8 @@ message("-- os_version_suffix:      ${os_version_suffix}")
 
 set(GCC_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/gcc-${GCC_VERSION})
 set(GCC_SRC_DIR ${PROJECT_BINARY_DIR}/src/gcc)
+set(CXX_COMPILER ${GCC_INSTALL_DIR}/bin/g++)
+set(C_COMPILER ${GCC_INSTALL_DIR}/bin/gcc)
 if(DOWNLOAD_GCC_BINARY AND NOT COMPILE_GCC) # Download binaries instead of compile
     message(STATUS "Downloading GCC binary: ${GCC_VERSION}")
 
@@ -65,5 +67,15 @@ elseif(NOT DOWNLOAD_GCC_BINARY AND COMPILE_GCC) # Compile GCC
 
 elseif(NOT DOWNLOAD_GCC_BINARY AND NOT COMPILE_GCC) # GCC on system is compatible
     message(STATUS "Using system GCC: ${CMAKE_CXX_COMPILER}")
+    set(CXX_COMPILER ${CMAKE_CXX_COMPILER})
+    set(C_COMPILER ${CMAKE_C_COMPILER})
     add_library(gcc INTERFACE)
 endif()
+
+set(TAG "OSCI")
+configure_file(${PROJECT_SOURCE_DIR}/gcc_conf.cmake.in ${PROJECT_BINARY_DIR}/gcc_conf_${TAG}.cmake)
+
+install(FILES ${PROJECT_BINARY_DIR}/gcc_conf_${TAG}.cmake
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/osci
+        RENAME gcc_conf.cmake
+        )
