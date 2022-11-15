@@ -7,7 +7,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
 		cmake_policy(SET CMP0135 NEW)
 endif()
 
-set(GROUP_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_CXX_COMPILER_VERSION})
+set(GROUP_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 
 
 set(SYSTEMC_VERSION 2.3.3)
@@ -65,13 +65,15 @@ ExternalProject_Add(fc4sc
 
 set(VERILATOR_INSTALL_DIR ${GROUP_INSTALL_DIR}/verilator-${VERILATOR_VERSION})
 set(VERILATOR_SRC_DIR ${PROJECT_BINARY_DIR}/src/verilator)
-# ExternalProject_Add(verilator
-#     GIT_REPOSITORY https://github.com/verilator/verilator.git
-#     GIT_TAG v${VERILATOR_VERSION}
-#     PREFIX ${PROJECT_BINARY_DIR}
-#     CONFIGURE_COMMAND  autoconf --output ${VERILATOR_SRC_DIR}/configure ${VERILATOR_SRC_DIR}/configure.ac && ${VERILATOR_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} --prefix=${VERILATOR_INSTALL_DIR}
-#     INSTALL_COMMAND make install && ${CMAKE_COMMAND} -E copy_directory ${VERILATOR_INSTALL_DIR}/share/verilator/include ${VERILATOR_INSTALL_DIR}/include
-#     )
+message(STATUS "VERILATOR_SRC_DIR ${VERILATOR_SRC_DIR}")
+ExternalProject_Add(verilator
+    GIT_REPOSITORY https://github.com/verilator/verilator.git
+    GIT_TAG v${VERILATOR_VERSION}
+    PREFIX ${PROJECT_BINARY_DIR}
+    PATCH_COMMAND patch -N ${VERILATOR_SRC_DIR}/verilator-config.cmake.in -i ${PROJECT_SOURCE_DIR}/verilator-config.patch || true
+    CONFIGURE_COMMAND  autoconf --output ${VERILATOR_SRC_DIR}/configure ${VERILATOR_SRC_DIR}/configure.ac && ${VERILATOR_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} --prefix=${VERILATOR_INSTALL_DIR}
+    INSTALL_COMMAND make install && ${CMAKE_COMMAND} -E copy_directory ${VERILATOR_INSTALL_DIR}/share/verilator/include ${VERILATOR_INSTALL_DIR}/include
+    )
 
 configure_file(${PROJECT_SOURCE_DIR}/source.sh.in ${PROJECT_BINARY_DIR}/source.sh)
 set(TAG ${CMAKE_CXX_COMPILER_VERSION})
@@ -80,4 +82,6 @@ configure_file(${PROJECT_SOURCE_DIR}/libs_conf.cmake.in ${PROJECT_BINARY_DIR}/li
 install(FILES ${PROJECT_BINARY_DIR}/source.sh
         DESTINATION ${GROUP_INSTALL_DIR})
 install(FILES ${PROJECT_BINARY_DIR}/libs_conf_${TAG}.cmake
-        DESTINATION ${GROUP_INSTALL_DIR})
+        DESTINATION ${GROUP_INSTALL_DIR}
+        RENAME libs_conf.cmake
+        )

@@ -4,7 +4,6 @@
 #include <systemc>
 #include <uvm>
 
-#include "apb.h"
 #include "apb_sequencer.h"
 #include "apb_driver.h"
 #include "apb_monitor.h"

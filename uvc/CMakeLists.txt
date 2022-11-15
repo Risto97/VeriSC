@@ -8,7 +8,6 @@ add_subdirectory(common)
 
 add_library(${PROJECT_NAME} SHARED)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
 include(${PROJECT_SOURCE_DIR}/cmake/get_libs.cmake)
 target_link_libraries(${PROJECT_NAME}
                         apb_lib
@@ -21,5 +20,3 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME}
     DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   )
-
-set(CMAKE_VERBOSE_MAKEFILE OFF)

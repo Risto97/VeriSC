@@ -40,9 +40,7 @@ namespace uvc::nmi{
         rw req;
         rw rsp;
 
-      UVM_INFO(this->get_name(), "Getting item", uvm::UVM_MEDIUM);
         seq_item_port->get_next_item(req);
-      UVM_INFO(this->get_name(), "Got item", uvm::UVM_MEDIUM);
 
         std::string str = req.convert2string();
 

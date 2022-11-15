@@ -1,13 +1,9 @@
 
-set(CMAKE_FIND_DEBUG_MODE True)
-find_file(file "libs_conf_${CMAKE_CXX_COMPILER_VERSION}.cmake"
-    PATHS "${CMAKE_INSTALL_PREFIX}/${CMAKE_CXX_COMPILER_VERSION}" NO_DEFAULT_PATH)
-set(CMAKE_FIND_DEBUG_MODE False)
-
-include(${file})
+find_file(libs_conf_cmake "libs_conf.cmake"
+    PATHS "${LIBS_CFG_DIR}" NO_DEFAULT_PATH)
+include(${libs_conf_cmake})
 
 set(TAG ${CMAKE_CXX_COMPILER_VERSION})
-message(STATUS "LOOKING FOR ${TAG}")
 
 find_library(systemc_lib systemc PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH)
 

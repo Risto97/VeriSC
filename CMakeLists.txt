@@ -1,56 +1,63 @@
 cmake_minimum_required(VERSION 3.12)
-
 project(SC_UVM_env VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-# set(CMAKE_VERBOSE_MAKEFILE ON)
-# set(CMAKE_FIND_DEBUG_MODE 1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    message(WARNING "Please define installation directonry by calling cmake with -DCMAKE_INSTALL_PREFIX=<installation-path>
+    Using default directory ${PROJECT_BINARY_DIR}")
+    set(CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR})
+endif()
 
 include(ExternalProject)
 
+include("${PROJECT_SOURCE_DIR}/gcc/check_gcc_version.cmake")
+message(STATUS "FROM SCRIPT: ${CXX_COMPILER}")
+message(STATUS "FROM SCRIPT: ${C_COMPILER}")
 ExternalProject_Add(gcc_install
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
-            SOURCE_DIR "${PROJECT_SOURCE_DIR}/gcc"
+            SOURCE_DIR ${PROJECT_SOURCE_DIR}/gcc
             CMAKE_ARGS
-                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/installs
+                -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+                -DCOMPILE_GCC=${COMPILE_GCC}
+                -DDOWNLOAD_GCC_BINARY=${DDOWNLOAD_GCC_BINARY}
             INSTALL_COMMAND ""
             )
 
+set(INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${GCC_VERSION})
 ExternalProject_Add(tools_install
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
             SOURCE_DIR "${PROJECT_SOURCE_DIR}/tools"
             DEPENDS gcc_install
+            BUILD_ALWAYS 1
             CMAKE_ARGS
-                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/installs
-                -DCMAKE_CXX_COMPILER=${PROJECT_BINARY_DIR}/installs/gcc-12.2.0/bin/g++ #TODO not correct
-                -DCMAKE_C_COMPILER=${PROJECT_BINARY_DIR}/installs/gcc-12.2.0/bin/gcc
+                -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}
+                -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
+                -DCMAKE_C_COMPILER=${C_COMPILER}
             )
 
 
-# set(GROUP_INSTALL_DIR ${PROJECT_BINARY_DIR}/installs/${CMAKE_CXX_COMPILER_VERSION})
-# set(UVC_INSTALL_DIR ${GROUP_INSTALL_DIR}/uvc/)
 ExternalProject_Add(uvc
-            # GIT_REPOSITORY https://github.com/Risto97/systemc_uvm_uvc.git
-            # GIT_TAG master
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
             SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
+            BUILD_ALWAYS 1
             CMAKE_ARGS
-                -DCMAKE_INSTALL_PREFIX=${PROJECT_BINARY_DIR}/installs
+                -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}/uvc
+                -DLIBS_CFG_DIR=${INSTALL_DIRECTORY}
                 -DCMAKE_INSTALL_LIBDIR=lib-linux64
                 -DCMAKE_INSTALL_INCLUDEDIR=include
                 -DCMAKE_CXX_STANDARD=17
-                -DCMAKE_CXX_COMPILER=${PROJECT_BINARY_DIR}/installs/gcc-12.2.0/bin/g++
-                -DCMAKE_C_COMPILER=${PROJECT_BINARY_DIR}/installs/gcc-12.2.0/bin/gcc
+                -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
+                -DCMAKE_C_COMPILER=${C_COMPILER}
             DEPENDS gcc_install tools_install
             )
+
 include(GNUInstallDirs)
 
 configure_file(EnvConfig.h.in EnvConfig.h)
@@ -71,11 +78,16 @@ install(
   FILES "${CMAKE_CURRENT_BINARY_DIR}/SC_UVM_envConfig.cmake"
   DESTINATION "${PROJECT_BINARY_DIR}"
   )
-  
-# install(TARGETS ${PROJECT_NAME}
-#     DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-#   )
 
+install(
+    FILES "${PROJECT_SOURCE_DIR}/cmake/verilator.cmake"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+  )
+install(
+    DIRECTORY "${PROJECT_SOURCE_DIR}/cmake/synopsys"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+  )
+  
 # uninstall target
 # if(NOT TARGET uninstall)
 #   configure_file(

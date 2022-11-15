@@ -4,13 +4,10 @@
 #include <systemc>
 #include <uvm>
 
-#include "i2c.h"
 #include "i2c_sequencer.h"
 #include "i2c_driver.h"
 #include "i2c_monitor.h"
 #include "i2c_modes.h"
-
-
 
 namespace uvc::i2c{
     class agent : public uvm::uvm_agent

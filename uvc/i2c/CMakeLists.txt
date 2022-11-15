@@ -24,11 +24,14 @@ target_include_directories(${PROJECT_NAME}
                 PUBLIC ${LIB_INCLUDES}
                 )
 
-install (FILES 
-        ${PROJECT_SOURCE_DIR}/inc/i2c.h
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        COMPONENT dev)
-
-# target_link_libraries(${PROJECT_NAME} 
-#                 PRIVATE ${LIBS}
-#                 )
+install (FILES i2c.h
+         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+         COMPONENT dev)
+install (DIRECTORY ${PROJECT_SOURCE_DIR}/inc/
+         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/i2c
+         COMPONENT dev
+         FILES_MATCHING PATTERN "*.h")
+install (DIRECTORY ${PROJECT_SOURCE_DIR}/inc/
+         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/i2c
+         COMPONENT dev
+         FILES_MATCHING PATTERN "*.hpp")
