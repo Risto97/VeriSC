@@ -1,46 +1,34 @@
 cmake_minimum_required(VERSION 3.8)
-project(env VERSION 1.0)
+project(nmi2apb_env VERSION 1.0)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-# set(CMAKE_FIND_DEBUG_MODE 1)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_subdirectory(rtl "rtllib")
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+add_library(${PROJECT_NAME} INTERFACE)
 
-# set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS "-DNDEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+target_sources(${PROJECT_NAME} INTERFACE
+    "${PROJECT_SOURCE_DIR}/sc_main.cpp"
+    "${PROJECT_SOURCE_DIR}/env.cpp"
+    "${PROJECT_SOURCE_DIR}/scoreboard.cpp"
 
-set(USE_VERILATOR True)
+    "${PROJECT_SOURCE_DIR}/nmi_sequence.cpp"
+    )
 
-set(CMAKE_PREFIX_PATH "$ENV{SC_UVM_ENV_HOME}")
-find_package(SC_UVM_env CONFIG REQUIRED)
-if (NOT SC_UVM_env_FOUND)
-    message(FATAL_ERROR "SystemC not found")
-endif()
+target_include_directories(${PROJECT_NAME} INTERFACE
+    ${PROJECT_SOURCE_DIR}
+    )
 
-list(APPEND EXTRA_LIBS "${SC_UVM_env_libs}")
-list(APPEND EXTRA_INCLUDES "${SC_UVM_env_include_dirs}")
+target_compile_options(${PROJECT_NAME} INTERFACE
+    -O3
+    -DNDEBUG
+    )
 
-add_subdirectory(rtl)
-
-add_executable(${PROJECT_NAME} 
-                "${PROJECT_SOURCE_DIR}/src/sc_main.cpp"
-                "${PROJECT_SOURCE_DIR}/src/env.cpp"
-                "${PROJECT_SOURCE_DIR}/src/scoreboard.cpp"
-               )
-
-
-target_include_directories(${PROJECT_NAME} 
-                PRIVATE "${EXTRA_INCLUDES}"
-                # ENV INCLUDES
-                PRIVATE "inc"
-                )
-
-target_link_libraries(${PROJECT_NAME} 
-                      PRIVATE rtl
-                      PRIVATE ${EXTRA_LIBS}
-                     )
-
+set(CMAKE_FIND_DEBUG_MODE True)
+find_file(libs_conf_cmake "libs_conf.cmake"
+    PATHS "$ENV{SC_UVM_ENV_HOME}/${CMAKE_CXX_COMPILER_VERSION}" NO_DEFAULT_PATH)
+include(${libs_conf_cmake})
+find_file(verilator_cmake "verilator.cmake"
+    PATHS "$ENV{SC_UVM_ENV_HOME}/*" NO_DEFAULT_PATH)
+set(CMAKE_FIND_DEBUG_MODE False)
+include(${verilator_cmake})

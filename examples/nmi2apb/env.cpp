@@ -1,35 +1,31 @@
-#include "sysc/kernel/sc_simcontext.h"
-#include "sysc/kernel/sc_status.h"
-#include "sysc/tracing/sc_trace.h"
-#include "verilated_vcd_sc.h"
+#include "env.h"
+#include "nmi2apb.h"
 #include <systemc>
 #include <uvm>
-
-#include "Vnmi2apb.h"
-#include "env.h"
 
 void env::build_phase(uvm::uvm_phase &phase) {
 
   uvm::uvm_env::build_phase(phase);
   uvm::uvm_config_db_options::turn_on_tracing();
 
-  apb_vif = new Apb_if("apb_slave", &clk);
-  nmi_vif = new nmi_if("nmi_master", &clk);
+  apb_vif = new uvc::apb::Intf("apb_slave", &clk);
+  nmi_vif = new uvc::nmi::intf("nmi_master", &clk);
 
-  apb_ag = new apb_agent("apb_agent_slave");
+  apb_ag = new uvc::apb::agent("apb_agent_slave");
   uvm::uvm_config_db<int>::set(this, "apb_agent_slave", "is_active",
                                !uvm::UVM_ACTIVE);
-  uvm::uvm_config_db<apb::mode_t>::set(this, "apb_agent_slave", "mode",
-                                       apb::SLAVE);
-  uvm::uvm_config_db<Apb_if *>::set(this, "apb_agent_slave", "vif", apb_vif);
-  nmi_ag = new nmi_agent("nmi_agent_master");
+  uvm::uvm_config_db<uvc::apb::mode_t>::set(this, "apb_agent_slave", "mode",
+                                            uvc::apb::SLAVE);
+  uvm::uvm_config_db<uvc::apb::Intf *>::set(this, "apb_agent_slave", "vif",
+                                            apb_vif);
+  nmi_ag = new uvc::nmi::agent("nmi_agent_master");
   uvm::uvm_config_db<int>::set(this, "nmi_agent_master", "is_active",
                                uvm::UVM_ACTIVE);
-  uvm::uvm_config_db<nmi::mode_t>::set(this, "nmi_agent_master", "mode",
-                                       nmi::MASTER);
-  uvm::uvm_config_db<nmi_if *>::set(this, "nmi_agent_master", "vif", nmi_vif);
+  uvm::uvm_config_db<uvc::nmi::mode_t>::set(this, "nmi_agent_master", "mode",
+                                            uvc::nmi::MASTER);
+  uvm::uvm_config_db<uvc::nmi::intf *>::set(this, "nmi_agent_master", "vif",
+                                            nmi_vif);
 
-  // apb_seq = apb_sequence::type_id::create("apb_seq");
   nmi_seq = nmi_sequence::type_id::create("nmi_seq");
 
   int verbosity;
@@ -39,7 +35,7 @@ void env::build_phase(uvm::uvm_phase &phase) {
   sb = scoreboard::type_id::create("sb", this);
   assert(sb);
 
-  apb_mem_i = new apb_mem_slave("apb_mem_i");
+  apb_mem_i = new uvc::apb::mem_slave("apb_mem_i");
 
   set_report_verbosity_level_hier(verbosity);
   set_report_verbosity_level(verbosity);
@@ -85,61 +81,44 @@ void env::reset_phase(uvm::uvm_phase &phase) {
   phase.drop_objection(this);
 }
 
-void env::start_apb_seq() {
-  apb_seq->start(apb_ag->sqr);
-  apb_seq->wait_for_sequence_state(uvm::UVM_FINISHED);
-}
 void env::start_nmi_seq() {
   nmi_seq->start(nmi_ag->sqr);
   nmi_seq->wait_for_sequence_state(uvm::UVM_FINISHED);
 }
 
-void env::final_phase(uvm::uvm_phase &phase) { 
-    close_trace(); 
-}
+void env::final_phase(uvm::uvm_phase &phase) { close_trace(); }
 
 void env::main_phase(uvm::uvm_phase &phase) {
   phase.raise_objection(this);
+  open_trace("trace.vcd");
 
-  VerilatedVcdSc* tfp = nullptr;
-  tfp = new VerilatedVcdSc;
-  dut.trace(tfp, 99);
-  tfp->open("trace.vcd");
-
-  // sc_core::sc_start();
   SC_FORK
-  // sc_core::sc_spawn(sc_core::sc_bind(&env::start_apb_seq, this)),
       sc_core::sc_spawn(sc_core::sc_bind(&env::start_nmi_seq, this)),
-      // sc_core::sc_spawn(sc_core::sc_bind(&env::timeout, this)),
   SC_JOIN
 
-          sc_core::wait(100 * T);
+  sc_core::wait(100 * T);
 
-  tfp->flush();
-  tfp->close();
-    tfp = nullptr;
   phase.drop_objection(this);
-}
-
-void env::timeout() {
-  sc_core::wait(300 * T);
-  // close_trace();
-  sc_core::sc_stop();
 }
 
 void env::reset(void) {
   rstn = 0;
   sc_core::wait(2 * T);
   rstn = 1;
-  // sc_core::wait(1.5 * T);
 }
 
 void env::open_trace(const char *vcdname) {
-  // dut.trace(m_trace, 10);
-  // m_trace->open(vcdname);
+#ifdef VERILATOR
+  m_trace = new VerilatedVcdSc;
+  dut.trace(m_trace, 99);
+  m_trace->open(vcdname);
+#endif
 }
 
 void env::close_trace(void) {
-  // m_trace->close();
-  // m_trace = NULL;
+#ifdef VERILATOR
+  m_trace->flush();
+  m_trace->close();
+  m_trace = nullptr;
+#endif
 }

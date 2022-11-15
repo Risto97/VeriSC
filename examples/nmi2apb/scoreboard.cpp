@@ -1,6 +1,6 @@
 #include "scoreboard.h"
-#include "apb_rw.h"
-#include "nmi_rw.h"
+#include "apb.h"
+#include "nmi.h"
 #include "uvmsc/base/uvm_object_globals.h"
 
 
@@ -21,7 +21,7 @@ static sc_dt::sc_lv<32> strobe_to_mask(sc_dt::sc_lv<4> strb){
     uvm::uvm_config_db<uvm_object *>::set(this, "apb_listener", "sb", this);
 
     apb_listener =
-        univ_subscriber<apb_rw, scoreboard,
+        uvc::univ_subscriber<uvc::apb::rw, scoreboard,
                         &scoreboard::apb_write>::type_id::create("apb_listener",
                                                                  this);
     assert(apb_listener);
@@ -29,7 +29,7 @@ static sc_dt::sc_lv<32> strobe_to_mask(sc_dt::sc_lv<4> strb){
     uvm::uvm_config_db<uvm_object *>::set(this, "nmi_listener", "sb", this);
 
     nmi_listener =
-        univ_subscriber<nmi_rw, scoreboard,
+        uvc::univ_subscriber<uvc::nmi::rw, scoreboard,
                         &scoreboard::nmi_write>::type_id::create("nmi_listener",
                                                                  this);
     assert(nmi_listener);
@@ -44,8 +44,8 @@ static sc_dt::sc_lv<32> strobe_to_mask(sc_dt::sc_lv<4> strb){
   void scoreboard::run_phase(uvm::uvm_phase &phase){ check(); }
 
   void scoreboard::check(){
-      apb_rw apb_p;
-      nmi_rw nmi_p;
+      uvc::apb::rw apb_p;
+      uvc::nmi::rw nmi_p;
 
       uint32_t mem[1024];
       std::fill_n(mem, 1024, -1);
@@ -63,28 +63,28 @@ static sc_dt::sc_lv<32> strobe_to_mask(sc_dt::sc_lv<4> strb){
 
           // NMI2APB reference model
          
-          if(nmi_p.kind_e == nmi::nmi_rw_enum::WRITE && apb_p.kind_e != apb_rw_enum::WRITE)
+          if(nmi_p.kind_e == uvc::nmi::rw_enum::WRITE && apb_p.kind_e != uvc::apb::rw_enum::WRITE)
               UVM_ERROR("SCOREBOARD", "NMI and APB kind different");
 
-          if(nmi_p.kind_e == nmi::nmi_rw_enum::WRITE && nmi_p.data != apb_p.data)
+          if(nmi_p.kind_e == uvc::nmi::rw_enum::WRITE && nmi_p.data != apb_p.data)
               UVM_ERROR("SCOREBOARD", "NMI and APB write data different");
 
-          if(nmi_p.kind_e == nmi::nmi_rw_enum::WRITE && nmi_p.addr != apb_p.addr)
+          if(nmi_p.kind_e == uvc::nmi::rw_enum::WRITE && nmi_p.addr != apb_p.addr)
               UVM_ERROR("SCOREBOARD", "NMI and APB write addr different");
 
-          if(nmi_p.kind_e == nmi::nmi_rw_enum::WRITE && nmi_p.strb != apb_p.strb)
+          if(nmi_p.kind_e == uvc::nmi::rw_enum::WRITE && nmi_p.strb != apb_p.strb)
               UVM_ERROR("SCOREBOARD", "NMI and APB strb different");
 
-          if(nmi_p.kind_e == nmi::nmi_rw_enum::READ && nmi_p.addr != apb_p.addr)
+          if(nmi_p.kind_e == uvc::nmi::rw_enum::READ && nmi_p.addr != apb_p.addr)
               UVM_ERROR("SCOREBOARD", "NMI and APB read addr different");
 
-          if(nmi_p.kind_e == nmi::nmi_rw_enum::READ && nmi_p.data != apb_p.data)
+          if(nmi_p.kind_e == uvc::nmi::rw_enum::READ && nmi_p.data != apb_p.data)
               UVM_ERROR("SCOREBOARD", "NMI and APB read data different");
 
           // APB_MEM slave reference model
           
           // WRITE TO MEMORY
-          if(apb_p.kind_e == apb_rw_enum::WRITE){
+          if(apb_p.kind_e == uvc::apb::rw_enum::WRITE){
               mem[apb_p.addr.to_uint()] = apb_p.data.to_uint() & strobe_to_mask(apb_p.strb).to_uint();
           }
 
@@ -96,12 +96,12 @@ static sc_dt::sc_lv<32> strobe_to_mask(sc_dt::sc_lv<4> strb){
       }
   }
 
-  void scoreboard::apb_write(const apb_rw &p) {
+  void scoreboard::apb_write(const uvc::apb::rw &p) {
     apb_vec.push_back(p);
     // UVM_INFO("PHASE_WRITE: ", p.str(), uvm::UVM_MEDIUM);
     apb_e.notify();
   }
-  void scoreboard::nmi_write(const nmi_rw &p) {
+  void scoreboard::nmi_write(const uvc::nmi::rw &p) {
     nmi_vec.push_back(p);
     // UVM_INFO("SIN_WRITE: ", p.str(), uvm::UVM_MEDIUM);
     nmi_e.notify();

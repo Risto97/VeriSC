@@ -1,24 +1,27 @@
+#include <cstdlib>
+#include<iostream>
 #include <systemc>
 #include <uvm>
+#include "fc4sc.hpp"
 #include <scv.h>
-#include "verilated.h"
-#include "Vnmi2apb.h"
-#include <cstdlib>
 
 #include "env.h"
-#include "fc4sc.hpp"
 
-#include<iostream>
+#ifdef VERILATOR
+#include "verilated.h"
+#endif
+
 
 int sc_main(int argc, char **argv) {
+#ifdef VERILATOR
   Verilated::commandArgs(argc, argv);
   Verilated::traceEverOn(true);
+#endif
 
   if(argc < 2)
       scv_random::set_global_seed(0);
   else
       scv_random::set_global_seed(atoi(argv[1]));
-  // VerilatedVcdSc m_trace;
   
 
   int verbosity = uvm::UVM_MEDIUM;
@@ -29,9 +32,6 @@ int sc_main(int argc, char **argv) {
 
   env *my_env = new env("env");
 
-  // my_env->dut.trace(&m_trace, 10);
-  // m_trace.open("trace.vcd");
-
   uvm::uvm_default_printer->knobs.reference = 0;
 
   uvm::uvm_root::get()->print_topology();
@@ -40,7 +40,6 @@ int sc_main(int argc, char **argv) {
 
   fc4sc::global::coverage_save("coverage_results.xml");
 
-  // m_trace.close();
   delete my_env;
 
   return 0;
