@@ -12,26 +12,28 @@
 
 
 
-class i2c_agent : public uvm::uvm_agent
-{
-    public:
-        i2c_sequencer* sqr;
-        i2c_driver* drv;
-        i2c_monitor* mon;
+namespace uvc::i2c{
+    class agent : public uvm::uvm_agent
+    {
+        public:
+            sequencer* sqr;
+            driver* drv;
+            monitor* mon;
 
-        i2c::mode_t mode;
+            mode_t mode;
 
-        i2c_if* vif;
+            intf* vif;
 
-        UVM_COMPONENT_UTILS(i2c_agent);
+            UVM_COMPONENT_UTILS(agent);
 
-        i2c_agent(uvm::uvm_component_name name);
-        ~i2c_agent();
+            agent(uvm::uvm_component_name name);
+            ~agent();
 
-        virtual void build_phase(uvm::uvm_phase& phase);
+            virtual void build_phase(uvm::uvm_phase& phase);
 
-        virtual void connect_phase(uvm::uvm_phase& phase);
+            virtual void connect_phase(uvm::uvm_phase& phase);
 
-};
+    };
+}
 
 #endif

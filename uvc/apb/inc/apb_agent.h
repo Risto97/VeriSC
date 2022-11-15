@@ -12,27 +12,29 @@
 
 
 
-class apb_agent : public uvm::uvm_agent
-{
-    public:
-        apb_sequencer* sqr;
-        apb_driver* drv;
-        apb_monitor* mon;
+namespace uvc::apb{
+    class agent : public uvm::uvm_agent
+    {
+        public:
+            sequencer* sqr;
+            driver* drv;
+            monitor* mon;
 
-        apb::mode_t mode;
-        uint32_t max_retry_count;
+            apb::mode_t mode;
+            uint32_t max_retry_count;
 
-        Apb_if* vif;
+            Intf* vif;
 
-        UVM_COMPONENT_UTILS(apb_agent);
+            UVM_COMPONENT_UTILS(agent);
 
-        apb_agent(uvm::uvm_component_name name);
-        ~apb_agent();
+            agent(uvm::uvm_component_name name);
+            ~agent();
 
-        virtual void build_phase(uvm::uvm_phase& phase);
+            virtual void build_phase(uvm::uvm_phase& phase);
 
-        virtual void connect_phase(uvm::uvm_phase& phase);
+            virtual void connect_phase(uvm::uvm_phase& phase);
 
-};
+    };
+}
 
 #endif /* APB_AGENT_H */

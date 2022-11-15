@@ -9,15 +9,16 @@
 #include "i2c_rw.h"
 #include <stdint.h>
 
-class i2c_driver : public uvm::uvm_driver<i2c_rw> {
+namespace uvc::i2c{
+class driver : public uvm::uvm_driver<rw> {
 public:
-  UVM_COMPONENT_UTILS(i2c_driver);
+  UVM_COMPONENT_UTILS(driver);
 
-  i2c_if *sigs;
+  intf *sigs;
 
-  i2c::mode_t mode;
+  mode_t mode;
 
-  i2c_driver(uvm::uvm_component_name name);
+  driver(uvm::uvm_component_name name);
 
   virtual void build_phase(uvm::uvm_phase &phase);
 
@@ -25,12 +26,13 @@ public:
 
 private:
   bool slave_drive_transaction();
-  i2c_rw read(const i2c_rw &req);
-  void write(const i2c_rw &req);
-  i2c_rw put_rsp_get_req(i2c_rw &rsp, i2c_rw &req, const std::string msg);
-  void put_rsp(i2c_rw &rsp, i2c_rw &req, const std::string msg);
-  i2c_rw handle_read_from_slave(i2c_rw &rd_req);
-  i2c_rw handle_write_to_slave(i2c_rw &req);
+  rw read(const rw &req);
+  void write(const rw &req);
+  rw put_rsp_get_req(rw &rsp, rw &req, const std::string msg);
+  void put_rsp(rw &rsp, rw &req, const std::string msg);
+  rw handle_read_from_slave(rw &rd_req);
+  rw handle_write_to_slave(rw &req);
 };
+}
 
 #endif

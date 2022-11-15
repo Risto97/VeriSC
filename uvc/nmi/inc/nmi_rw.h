@@ -4,25 +4,24 @@
 #include <systemc>
 #include <uvm>
 
-namespace nmi{
+namespace uvc::nmi{
     typedef enum {
         READ,
         WRITE,
         INSN
-    } nmi_rw_enum;
-}
+    } rw_enum;
 
-class nmi_rw : public uvm::uvm_sequence_item {
+class rw : public uvm::uvm_sequence_item {
     public:
         sc_dt::sc_bv<32> addr;
         sc_dt::sc_bv<32> data;
         sc_dt::sc_bv<4> strb;
-        nmi::nmi_rw_enum kind_e;
+        rw_enum kind_e;
         bool valid;
 
-        UVM_OBJECT_UTILS(nmi_rw);
+        UVM_OBJECT_UTILS(rw);
 
-        nmi_rw(const std::string & name = "nmi_rw") :
+        rw(const std::string & name = "nmi_rw") :
             uvm::uvm_sequence_item(name) {}
 
         virtual void do_print(const uvm::uvm_printer& printer) const;
@@ -32,5 +31,6 @@ class nmi_rw : public uvm::uvm_sequence_item {
         virtual bool do_compare(const uvm_object& rhs) const;
         std::string convert2string() const;
 };
+}
 
 #endif /* NMI_RW_ */

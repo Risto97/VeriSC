@@ -10,26 +10,28 @@
 #include "nmi_modes.h"
 
 
-class nmi_agent : public uvm::uvm_agent
-{
-    public:
-        nmi_sequencer* sqr;
-        nmi_driver* drv;
-        nmi_monitor* mon;
+namespace uvc::nmi{
+    class agent : public uvm::uvm_agent
+    {
+        public:
+            sequencer* sqr;
+            driver* drv;
+            monitor* mon;
 
-        nmi::mode_t mode;
+            mode_t mode;
 
-        nmi_if* vif;
+            intf *vif;
 
-        UVM_COMPONENT_UTILS(nmi_agent);
+            UVM_COMPONENT_UTILS(agent);
 
-        nmi_agent(uvm::uvm_component_name name);
-        ~nmi_agent();
+            agent(uvm::uvm_component_name name);
+            ~agent();
 
-        virtual void build_phase(uvm::uvm_phase& phase);
+            virtual void build_phase(uvm::uvm_phase& phase);
 
-        virtual void connect_phase(uvm::uvm_phase& phase);
+            virtual void connect_phase(uvm::uvm_phase& phase);
 
-};
+    };
+}
 
 #endif /* NMI_AGENT_H */

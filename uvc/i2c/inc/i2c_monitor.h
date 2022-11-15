@@ -7,34 +7,36 @@
 #include "i2c_if.h"
 #include "i2c_rw.h"
 
-class i2c_monitor : public uvm::uvm_monitor {
-public:
-  i2c_if *sigs;
+namespace uvc::i2c{
+    class monitor : public uvm::uvm_monitor {
+    public:
+      intf *sigs;
 
-  //
-  uvm::uvm_analysis_port<i2c_rw> ap;
+      //
+      uvm::uvm_analysis_port<rw> ap;
 
-  UVM_COMPONENT_UTILS(i2c_monitor);
+      UVM_COMPONENT_UTILS(monitor);
 
-  i2c_monitor(uvm::uvm_component_name name);
+      monitor(uvm::uvm_component_name name);
 
-  virtual void static_assertions();
-  virtual void dynamic_assertions();
+      virtual void static_assertions();
+      virtual void dynamic_assertions();
 
-  virtual void build_phase(uvm::uvm_phase &phase);
+      virtual void build_phase(uvm::uvm_phase &phase);
 
-  virtual void connect_phase(uvm::uvm_phase &phase);
+      virtual void connect_phase(uvm::uvm_phase &phase);
 
-  virtual void run_phase(uvm::uvm_phase &phase);
+      virtual void run_phase(uvm::uvm_phase &phase);
 
-  virtual void run_monitor();
-  i2c_rw monitor_transaction();
-  bool wait_start_condition();
-  uint32_t read_addr();
-  bool read_rw();
-  bool read_ack();
-  uint32_t read_data_byte();
-  bool wait_stop_condition();
-};
+      virtual void run_monitor();
+      rw monitor_transaction();
+      bool wait_start_condition();
+      uint32_t read_addr();
+      bool read_rw();
+      bool read_ack();
+      uint32_t read_data_byte();
+      bool wait_stop_condition();
+    };
+}
 
 #endif

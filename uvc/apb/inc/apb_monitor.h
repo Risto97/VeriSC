@@ -7,36 +7,38 @@
 #include "apb_if.h"
 #include "apb_rw.h"
 
-class apb_monitor : public uvm::uvm_monitor
-{
-    public:
-        Apb_if* sigs;
+namespace uvc::apb{
+    class monitor : public uvm::uvm_monitor
+    {
+        public:
+            Intf* sigs;
 
-        sc_core::sc_signal<sc_dt::sc_uint<32>> *paddr_old;
-        sc_core::sc_signal<bool>  *psel_old;
-        sc_core::sc_signal<bool>  *penable_old;
-        sc_core::sc_signal<bool>  *pwrite_old;
-        sc_core::sc_signal<bool>  *pready_old;
-        sc_core::sc_signal<sc_dt::sc_uint<32>> *prdata_old;
-        sc_core::sc_signal<sc_dt::sc_uint<4>> *pstrb_old;
-        sc_core::sc_signal<sc_dt::sc_uint<32>> *pwdata_old;
-        //
-        uvm::uvm_analysis_port<apb_rw> ap;
+            sc_core::sc_signal<sc_dt::sc_uint<32>> *paddr_old;
+            sc_core::sc_signal<bool>  *psel_old;
+            sc_core::sc_signal<bool>  *penable_old;
+            sc_core::sc_signal<bool>  *pwrite_old;
+            sc_core::sc_signal<bool>  *pready_old;
+            sc_core::sc_signal<sc_dt::sc_uint<32>> *prdata_old;
+            sc_core::sc_signal<sc_dt::sc_uint<4>> *pstrb_old;
+            sc_core::sc_signal<sc_dt::sc_uint<32>> *pwdata_old;
+            //
+            uvm::uvm_analysis_port<rw> ap;
 
-        UVM_COMPONENT_UTILS(apb_monitor);
+            UVM_COMPONENT_UTILS(monitor);
 
-        apb_monitor(uvm::uvm_component_name name);
+            monitor(uvm::uvm_component_name name);
 
-        virtual void static_assertions();
-        virtual void dynamic_assertions();
+            virtual void static_assertions();
+            virtual void dynamic_assertions();
 
-        virtual void build_phase(uvm::uvm_phase & phase);
+            virtual void build_phase(uvm::uvm_phase & phase);
 
-        virtual void connect_phase(uvm::uvm_phase & phase);
+            virtual void connect_phase(uvm::uvm_phase & phase);
 
-        virtual void run_phase(uvm::uvm_phase & phase);
+            virtual void run_phase(uvm::uvm_phase & phase);
 
-        virtual void run_monitor();
-};
+            virtual void run_monitor();
+    };
+}
 
 #endif /* APB_MONITOR_H_ */

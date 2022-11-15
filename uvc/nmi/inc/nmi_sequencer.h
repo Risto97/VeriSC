@@ -6,14 +6,16 @@
 
 #include "nmi_rw.h"
 
-class nmi_sequencer : public uvm::uvm_sequencer<nmi_rw>
-{
-    public:
-        UVM_COMPONENT_UTILS(nmi_sequencer);
+namespace uvc::nmi{
+    class sequencer : public uvm::uvm_sequencer<rw>
+    {
+        public:
+            UVM_COMPONENT_UTILS(sequencer);
 
-        nmi_sequencer(uvm::uvm_component_name name) :
-            uvm::uvm_sequencer<nmi_rw>(name) {}
-};
+            sequencer(uvm::uvm_component_name name) :
+                uvm::uvm_sequencer<rw>(name) {}
+    };
+}
 
 
 #endif /* NMI_SEQUENCER_H_ */
