@@ -23,8 +23,9 @@ ExternalProject_Add(gcc_install
             SOURCE_DIR ${PROJECT_SOURCE_DIR}/gcc
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+                -DGCC_VERSION=${GCC_VERSION}
                 -DCOMPILE_GCC=${COMPILE_GCC}
-                -DDOWNLOAD_GCC_BINARY=${DDOWNLOAD_GCC_BINARY}
+                -DDOWNLOAD_GCC_BINARY=${DOWNLOAD_GCC_BINARY}
             INSTALL_COMMAND ""
             )
 

@@ -13,16 +13,9 @@ message("-- CMAKE_SYSTEM:           ${CMAKE_SYSTEM}")
 string (REGEX MATCH "\\.el[1-9]" os_version_suffix ${CMAKE_SYSTEM})
 message("-- os_version_suffix:      ${os_version_suffix}")
 
-message(STATUS "G++: ${CMAKE_CXX_COMPILER}")
-set(GCC_VERSION ${CMAKE_CXX_COMPILER_VERSION})
 
-execute_process(
-    COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-
-message(STATUS "PROJECT BINRAY DIR: ${PROJECT_BINARY_DIR}")
 set(GCC_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/gcc-${GCC_VERSION})
 set(GCC_SRC_DIR ${PROJECT_BINARY_DIR}/src/gcc)
-message(STATUS "PROJECT BINRAY DIR: ${GCC_SRC_DIR}")
 if(DOWNLOAD_GCC_BINARY AND NOT COMPILE_GCC) # Download binaries instead of compile
     message(STATUS "Downloading GCC binary: ${GCC_VERSION}")
 
