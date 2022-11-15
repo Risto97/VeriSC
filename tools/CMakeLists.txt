@@ -75,8 +75,8 @@ ExternalProject_Add(verilator
     INSTALL_COMMAND make install && ${CMAKE_COMMAND} -E copy_directory ${VERILATOR_INSTALL_DIR}/share/verilator/include ${VERILATOR_INSTALL_DIR}/include
     )
 
+set(TAG "OSCI")
 configure_file(${PROJECT_SOURCE_DIR}/source.sh.in ${PROJECT_BINARY_DIR}/source.sh)
-set(TAG ${CMAKE_CXX_COMPILER_VERSION})
 configure_file(${PROJECT_SOURCE_DIR}/libs_conf.cmake.in ${PROJECT_BINARY_DIR}/libs_conf_${TAG}.cmake)
 
 install(FILES ${PROJECT_BINARY_DIR}/source.sh

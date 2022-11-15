@@ -1,5 +1,9 @@
 
-# function(verilator)
+function(verilator)
+    find_file(libs_conf_cmake "libs_conf.cmake"
+        PATHS "$ENV{SC_UVM_ENV_HOME}/osci" NO_DEFAULT_PATH)
+    include(${libs_conf_cmake})
+
     string(REPLACE "_env" "_rtl" RTL_LIB ${PROJECT_NAME})
     get_target_property(IP_V_SOURCES ${RTL_LIB} INTERFACE_V_SOURCES) # TODO CHANGE
     set(V_SOURCES ${IP_V_SOURCES})
@@ -7,7 +11,7 @@
     message(DEBUG "RTL_LIB included: ${RTL_LIB}")
     message(DEBUG "V_SOURCES from RTL_LIB ${V_SOURCES}")
 
-    set(TAG ${CMAKE_CXX_COMPILER_VERSION})
+    set(TAG OSCI)
     find_library(uvc_lib uvc PATHS "${UVC_HOME_${TAG}}/*" NO_DEFAULT_PATH)
     find_library(systemc_lib systemc PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH)
     find_library(sc_uvm_lib uvm-systemc PATHS "${SYSTEMC_UVM_HOME_${TAG}}/*" NO_DEFAULT_PATH)
@@ -31,14 +35,11 @@
         "${UVC_HOME_${TAG}}/include" 
         )
 
-    set(CMAKE_FIND_DEBUG_MODE TRUE)
     set(VERILATOR_ROOT ${VERILATOR_HOME_${TAG}})
-    message(STATUS "VERILATOR ROO0000T: ${VERILATOR_ROOT}")
     find_package(verilator HINTS ${VERILATOR_ROOT})
     if (NOT verilator_FOUND)
       message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
     endif()
-    set(CMAKE_FIND_DEBUG_MODE FALSE)
 
 # specify the C++ standard
     set(CMAKE_CXX_STANDARD 17)
@@ -92,4 +93,4 @@
                       ${COMMAND} verilator_tb
                       DEPENDS verilator_tb)
                
-# endfunction()
+endfunction()

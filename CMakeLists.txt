@@ -28,7 +28,7 @@ ExternalProject_Add(gcc_install
             INSTALL_COMMAND ""
             )
 
-set(INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${GCC_VERSION})
+set(INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX}/osci)
 ExternalProject_Add(tools_install
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
@@ -50,6 +50,7 @@ ExternalProject_Add(uvc
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}/uvc
                 -DLIBS_CFG_DIR=${INSTALL_DIRECTORY}
+                -DINSTALL_GROUP=OSCI
                 -DCMAKE_INSTALL_LIBDIR=lib-linux64
                 -DCMAKE_INSTALL_INCLUDEDIR=include
                 -DCMAKE_CXX_STANDARD=17
@@ -60,24 +61,16 @@ ExternalProject_Add(uvc
 
 include(GNUInstallDirs)
 
-configure_file(EnvConfig.h.in EnvConfig.h)
+# configure_file(${PROJECT_SOURCE_DIR}/cmake/sc_uvm_env_setup.cmake.in ${PROJECT_BINARY_DIR}/sc_uvm_env_setup.cmake)
+install(FILES ${PROJECT_SOURCE_DIR}/cmake/sc_uvm_env_setup.cmake
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+    )
 
 
 set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 message(STATUS "INSTALL_LIBDIR: ${config_install_dir}")
 
 include(CMakePackageConfigHelpers)
-configure_file( 
-      "cmake/SC_UVM_envConfig.cmake.in" 
-      # "${CMAKE_CURRENT_BINARY_DIR}/SC_UVM_envConfig.cmake"
-      "SC_UVM_envConfig.cmake"
-      # INSTALL_DESTINATION "${PROJECT_BINARY_DIR}"
-  )
-
-install(
-  FILES "${CMAKE_CURRENT_BINARY_DIR}/SC_UVM_envConfig.cmake"
-  DESTINATION "${PROJECT_BINARY_DIR}"
-  )
 
 install(
     FILES "${PROJECT_SOURCE_DIR}/cmake/verilator.cmake"
