@@ -8,13 +8,11 @@ add_subdirectory(common)
 
 add_library(${PROJECT_NAME} SHARED)
 
-include(${PROJECT_SOURCE_DIR}/cmake/get_libs.cmake)
 target_link_libraries(${PROJECT_NAME}
                         apb_lib
                         nmi_lib
                         i2c_lib
                         common_lib
-                        ${LIBS}
                         )
 
 install(TARGETS ${PROJECT_NAME}

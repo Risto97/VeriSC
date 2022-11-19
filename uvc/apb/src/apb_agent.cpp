@@ -37,14 +37,14 @@ namespace uvc::apb{
         UVM_INFO("APB AGENT build PHASE", "", uvm::UVM_MEDIUM);
         uvm::uvm_agent::build_phase(phase);
 
-        mon = monitor::type_id::create("mon", this);
+        mon = monitor::type_id::create("apb_mon", this);
         assert(mon);
 
         if (get_is_active() == uvm::UVM_ACTIVE)
         {
-            sqr = sequencer::type_id::create("sqr", this);
+            sqr = sequencer::type_id::create("apb_sqr", this);
             assert(sqr);
-            drv = driver::type_id::create("drv", this);
+            drv = driver::type_id::create("apb_drv", this);
             assert(drv);
         }
 

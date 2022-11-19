@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(SC_UVM_env VERSION 1.0.0)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -29,7 +26,7 @@ ExternalProject_Add(gcc_install
                 -DDOWNLOAD_GCC_BINARY=${DOWNLOAD_GCC_BINARY}
             )
 
-set(INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX}/osci)
+set(INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX}/open)
 ExternalProject_Add(tools_install
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
@@ -51,7 +48,7 @@ ExternalProject_Add(uvc
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}/uvc
                 -DLIBS_CFG_DIR=${INSTALL_DIRECTORY}
-                -DINSTALL_GROUP=OSCI
+                -DINSTALL_GROUP=OPEN
                 -DCMAKE_INSTALL_LIBDIR=lib-linux64
                 -DCMAKE_INSTALL_INCLUDEDIR=include
                 -DCMAKE_CXX_STANDARD=17
@@ -60,6 +57,45 @@ ExternalProject_Add(uvc
             DEPENDS gcc_install tools_install
             )
 
+set(VCS_C_COMPILER /eda/synopsys/2021-22/RHELx86/VCS_2021.09-SP1/gnu/linux64/gcc-9.2.0_64/bin/gcc)
+set(VCS_CXX_COMPILER /eda/synopsys/2021-22/RHELx86/VCS_2021.09-SP1/gnu/linux64/gcc-9.2.0_64/bin/g++)
+set(VCS_INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX}/vcs)
+ExternalProject_Add(tools_install_vcs
+            DOWNLOAD_COMMAND ""
+            PREFIX ${PROJECT_BINARY_DIR}
+            SOURCE_DIR "${PROJECT_SOURCE_DIR}/tools_vcs"
+            BUILD_ALWAYS 1
+            CMAKE_ARGS
+                -DCMAKE_INSTALL_PREFIX=${VCS_INSTALL_DIRECTORY}
+                -DCMAKE_CXX_COMPILER=${VCS_CXX_COMPILER}
+                -DCMAKE_C_COMPILER=${VCS_C_COMPILER}
+                -DVCS_HOME=${VCS_HOME}
+            )
+
+set(VG_GNU_PACKAGE "${VCS_HOME}/gnu/linux64/")
+set(VCS_PATH_ENV "${VCS_HOME}/gnu/linux64/binutils-2.33.1_64/bin/:${VCS_HOME}/gnu/linux64/gcc-9.2.0_64/bin/:$ENV{PATH}")
+set(VCS_LIB_PATH "${VCS_HOME}/gnu/linux64/gcc-9.2.0_64/lib64/:${VCS_HOME}/gnu/linux64/gcc-9.2.0_64/lib/:$ENV{LD_LIBRARY_PATH}")
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(VCS_LINKER ${VCS_HOME}/gnu/linux64/binutils-2.33.1_64/bin/ld)
+ExternalProject_Add(uvc_vcs
+            DOWNLOAD_COMMAND ""
+            PREFIX ${PROJECT_BINARY_DIR}
+            SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
+            BUILD_ALWAYS 1
+            CMAKE_ARGS
+                -DCMAKE_INSTALL_PREFIX=${VCS_INSTALL_DIRECTORY}/uvc
+                -DLIBS_CFG_DIR=${VCS_INSTALL_DIRECTORY}
+                -DINSTALL_GROUP=VCS
+                -DCMAKE_INSTALL_LIBDIR=lib-linux64
+                -DCMAKE_INSTALL_INCLUDEDIR=include
+                # -DCMAKE_CXX_STANDARD=17
+                -DCMAKE_LINKER=${VCS_LINKER}
+                -DCMAKE_CXX_COMPILER=${VCS_CXX_COMPILER}
+                -DCMAKE_C_COMPILER=${VCS_C_COMPILER}
+            DEPENDS tools_install_vcs
+            )
+
+                #
 include(GNUInstallDirs)
 
 # configure_file(${PROJECT_SOURCE_DIR}/cmake/sc_uvm_env_setup.cmake.in ${PROJECT_BINARY_DIR}/sc_uvm_env_setup.cmake)

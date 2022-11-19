@@ -1,7 +1,8 @@
-
 function(verilator)
     find_file(libs_conf_cmake "libs_conf.cmake"
-        PATHS "$ENV{SC_UVM_ENV_HOME}/osci" NO_DEFAULT_PATH)
+        PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH
+        NO_CACHE
+        )
     include(${libs_conf_cmake})
 
     string(REPLACE "_env" "_rtl" RTL_LIB ${PROJECT_NAME})
@@ -11,15 +12,27 @@ function(verilator)
     message(DEBUG "RTL_LIB included: ${RTL_LIB}")
     message(DEBUG "V_SOURCES from RTL_LIB ${V_SOURCES}")
 
-    set(TAG OSCI)
-    find_library(uvc_lib uvc PATHS "${UVC_HOME_${TAG}}/*" NO_DEFAULT_PATH)
-    find_library(systemc_lib systemc PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH)
-    find_library(sc_uvm_lib uvm-systemc PATHS "${SYSTEMC_UVM_HOME_${TAG}}/*" NO_DEFAULT_PATH)
-    find_library(scv_lib scv PATHS "${SCV_HOME_${TAG}}/*" NO_DEFAULT_PATH)
-
+    set(TAG OPEN)
+    find_library(uvc_lib uvc
+        PATHS "${UVC_HOME_${TAG}}/*"
+        NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    find_library(systemc_lib_sci systemc
+        PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    find_library(sc_uvm_lib uvm-systemc
+        PATHS "${SYSTEMC_UVM_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    find_library(scv_lib scv
+        PATHS "${SCV_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
 
     list(APPEND EXTRA_LIBS 
-                ${systemc_lib}
+                ${systemc_lib_sci}
                 ${sc_uvm_lib}
                 ${scv_lib}
                 ${uvc_lib}
@@ -90,7 +103,9 @@ function(verilator)
                           ${EXTRA_LIBS}
                         )
     add_custom_target(run
-                      ${COMMAND} verilator_tb
-                      DEPENDS verilator_tb)
+        ${COMMAND} 
+        ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${GLIB_DIR}:$ENV{LD_LIBRARY_PATH}"
+            verilator_tb
+        DEPENDS verilator_tb)
                
 endfunction()

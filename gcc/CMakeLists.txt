@@ -72,10 +72,10 @@ elseif(NOT DOWNLOAD_GCC_BINARY AND NOT COMPILE_GCC) # GCC on system is compatibl
     add_library(gcc INTERFACE)
 endif()
 
-set(TAG "OSCI")
+set(TAG "OPEN")
 configure_file(${PROJECT_SOURCE_DIR}/gcc_conf.cmake.in ${PROJECT_BINARY_DIR}/gcc_conf_${TAG}.cmake)
 
 install(FILES ${PROJECT_BINARY_DIR}/gcc_conf_${TAG}.cmake
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/osci
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/open
         RENAME gcc_conf.cmake
         )
