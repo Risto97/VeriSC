@@ -10,9 +10,7 @@ MESSAGE(STATUS "LIBS_CONFG sc : ${SYSTEMC_HOME_${INSTALL_GROUP}}/lib-linux64/")
 MESSAGE(STATUS "LIBS_CONFG  uvm: ${SYSTEMC_UVM_HOME_${INSTALL_GROUP}}")
 MESSAGE(STATUS "LIBS_CONFG scv: ${SCV_HOME_${INSTALL_GROUP}}")
 
-set(CMAKE_FIND_DEBUG_MODE True)
 find_library(systemc_lib systemc PATHS "${SYSTEMC_HOME_${INSTALL_GROUP}}/lib-linux64/" NO_DEFAULT_PATH)
-set(CMAKE_FIND_DEBUG_MODE False)
 
 find_library(sc_uvm_lib uvm-systemc PATHS "/scratch/rpejasin/synopsys_systemc/uvm-systemc-1.0-beta4/lib-linux64/" NO_DEFAULT_PATH)
 # find_library(sc_uvm_lib uvm-systemc PATHS "${SYSTEMC_UVM_HOME_${INSTALL_GROUP}}/lib-linux64/" NO_DEFAULT_PATH)

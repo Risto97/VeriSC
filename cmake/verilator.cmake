@@ -54,10 +54,6 @@ function(verilator)
       message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
     endif()
 
-# specify the C++ standard
-    set(CMAKE_CXX_STANDARD 17)
-    set(CMAKE_CXX_STANDARD_REQUIRED True)
-
 # SystemC dependencies
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
@@ -102,10 +98,15 @@ function(verilator)
                           verilated_lib  
                           ${EXTRA_LIBS}
                         )
+if(DEFINED ENV{LD_LIBRARY_PATH})
+    set(RUN_PATH "LD_LIBRARY_PATH=${GLIB_DIR}:$ENV{LD_LIBRARY_PATH}")
+else()
+    set(RUN_PATH "LD_LIBRARY_PATH=${GLIB_DIR}")
+endif()
     add_custom_target(run
         ${COMMAND} 
-        ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=${GLIB_DIR}:$ENV{LD_LIBRARY_PATH}"
-            verilator_tb
+        ${CMAKE_COMMAND} -E env ${RUN_PATH}
+            ./verilator_tb
         DEPENDS verilator_tb)
                
 endfunction()

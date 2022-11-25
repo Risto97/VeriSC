@@ -1,3 +1,8 @@
+set(USE_VCS @USE_VCS@)
+set(CMAKE_MIN_VERSION 3.25)
+set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
+
+
 find_file(gcc_conf_cmake "gcc_conf.cmake"
     PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH)
 include(${gcc_conf_cmake})
@@ -8,13 +13,17 @@ find_file(verilator_cmake "verilator.cmake"
     )
 include(${verilator_cmake})
 
+if(${USE_VCS})
 find_file(vcs_cmake "vcs.cmake"
     PATHS "$ENV{SC_UVM_ENV_HOME}/cmake/synopsys" NO_DEFAULT_PATH
     NO_CACHE
     )
 include(${vcs_cmake})
+endif()
 
 function(setup)
     verilator()
-    vcs()
+    if(${USE_VCS})
+        vcs()
+    endif()
 endfunction()

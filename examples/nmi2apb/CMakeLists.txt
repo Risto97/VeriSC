@@ -2,7 +2,7 @@ find_file(setup_fn "sc_uvm_env_setup.cmake"
     PATHS "$ENV{SC_UVM_ENV_HOME}" NO_DEFAULT_PATH)
 include(${setup_fn})
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION ${CMAKE_MIN_VERSION})
 project(nmi2apb_env VERSION 1.0)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

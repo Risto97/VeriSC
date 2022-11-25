@@ -27,7 +27,7 @@ ExternalProject_Add(systemc
     CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX=${SYSTEMC_INSTALL_DIR}
         -DCMAKE_INSTALL_LIBDIR=lib-linux64
-        -DCMAKE_CXX_STANDARD=17
+        -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
         -DENABLE_PHASE_CALLBACKS_TRACING=OFF
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
@@ -35,10 +35,12 @@ ExternalProject_Add(systemc
 
 set(SCV_INSTALL_DIR ${GROUP_INSTALL_DIR}/scv-${SCV_VERSION})
 set(SCV_SRC_DIR ${PROJECT_BINARY_DIR}/src/scv)
+set(SCV_CXX "${CMAKE_CXX_COMPILER} -std=c++${CMAKE_CXX_STANDARD}")
+message(status "SCV_COMPILER: ${SCV_CXX}")
 ExternalProject_Add(scv
     URL https://www.accellera.org/images/downloads/standards/systemc/scv-${SCV_VERSION}.tar.gz
     PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND autoreconf -fiv ${SCV_SRC_DIR} && ${SCV_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${SCV_INSTALL_DIR}
+    CONFIGURE_COMMAND autoreconf -fiv ${SCV_SRC_DIR} && ${SCV_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${SCV_CXX} CXXFLAGS=-std=c++${CMAKE_CXX_STANDARD} --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${SCV_INSTALL_DIR}
     DEPENDS systemc
     )
 
@@ -47,7 +49,7 @@ set(UVM_SRC_DIR ${PROJECT_BINARY_DIR}/src/uvm-systemc)
 ExternalProject_Add(uvm-systemc
     URL https://www.accellera.org/images/downloads/standards/systemc/uvm-systemc-${UVM_VERSION}.tar.gz
     PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND autoreconf -fiv ${UVM_SRC_DIR} && ${UVM_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${UVM_INSTALL_DIR}
+    CONFIGURE_COMMAND autoreconf -fiv ${UVM_SRC_DIR} && ${UVM_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=-std=c++${CMAKE_CXX_STANDARD} --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${UVM_INSTALL_DIR}
     DEPENDS systemc
     )
 
