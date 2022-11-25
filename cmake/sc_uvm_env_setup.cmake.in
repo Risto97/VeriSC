@@ -13,7 +13,7 @@ find_file(verilator_cmake "verilator.cmake"
     )
 include(${verilator_cmake})
 
-if(${USE_VCS})
+if(USE_VCS)
 find_file(vcs_cmake "vcs.cmake"
     PATHS "$ENV{SC_UVM_ENV_HOME}/cmake/synopsys" NO_DEFAULT_PATH
     NO_CACHE
@@ -23,7 +23,7 @@ endif()
 
 function(setup)
     verilator()
-    if(${USE_VCS})
+    if(USE_VCS)
         vcs()
     endif()
 endfunction()
