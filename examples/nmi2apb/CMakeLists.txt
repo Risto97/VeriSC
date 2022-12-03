@@ -27,5 +27,5 @@ target_compile_options(${PROJECT_NAME} INTERFACE
     -DNDEBUG
     )
 
-make_rtl(rtl_lib ${RTL_LIB_NAME})
+make_rtl(rtl_lib nmi2apb_rtl)
 make_tb(${PROJECT_NAME} "rtl_lib")
