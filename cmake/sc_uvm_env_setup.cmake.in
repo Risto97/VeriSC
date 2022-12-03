@@ -2,7 +2,6 @@ set(USE_VCS @USE_VCS@)
 set(CMAKE_MIN_VERSION 3.25)
 set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
 
-
 find_file(gcc_conf_cmake "gcc_conf.cmake"
     PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH)
 include(${gcc_conf_cmake})
@@ -21,9 +20,10 @@ find_file(vcs_cmake "vcs.cmake"
 include(${vcs_cmake})
 endif()
 
-function(setup)
-    verilator()
-    if(${USE_VCS})
-        vcs()
-    endif()
+function(make_rtl OUT_LIB RTL_LIB)
+    verilate_rtl(${OUT_LIB} ${RTL_LIB})
+endfunction()
+
+function(make_tb SC_LIB RTL_LIBS)
+    verilate_tb(${SC_LIB} "${RTL_LIBS}")
 endfunction()

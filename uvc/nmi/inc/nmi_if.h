@@ -31,6 +31,18 @@ namespace uvc::nmi{
             clk = clk_in;
             }
 
+    void trace(sc_core::sc_trace_file *wf){
+        std::string name = this->name();
+        sc_trace(wf, mem_valid, name + "_mem_valid");
+        sc_trace(wf, mem_ready, name + "_mem_ready");
+        sc_trace(wf, mem_addr,  name + "_mem_addr");
+        sc_trace(wf, mem_wstrb, name + "_mem_wstrb");
+        sc_trace(wf, mem_rdata, name + "_mem_rdata");
+        sc_trace(wf, mem_wdata, name + "_mem_wdata");
+        sc_trace(wf, mem_instr, name + "_mem_instr");
+
+    }
+
     };
 }
 

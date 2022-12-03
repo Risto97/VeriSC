@@ -1,16 +1,60 @@
-function(verilator)
+function(verilate_rtl OUT_LIB RTL_LIB)
+    get_target_property(V_SOURCES ${RTL_LIB} INTERFACE_V_SOURCES)
+    get_target_property(V_ARGS ${RTL_LIB} VERILOG_ARGS)
+
+    if(V_ARGS STREQUAL "V_ARGS-NOTFOUND")
+        set(V_ARGS "")
+    endif()
+
+    set(TAG OPEN)
     find_file(libs_conf_cmake "libs_conf.cmake"
         PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH
         NO_CACHE
         )
     include(${libs_conf_cmake})
 
-    string(REPLACE "_env" "_rtl" RTL_LIB ${PROJECT_NAME})
-    get_target_property(IP_V_SOURCES ${RTL_LIB} INTERFACE_V_SOURCES) # TODO CHANGE
-    set(V_SOURCES ${IP_V_SOURCES})
+    find_library(systemc_lib_sci systemc
+        PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
 
-    message(DEBUG "RTL_LIB included: ${RTL_LIB}")
-    message(DEBUG "V_SOURCES from RTL_LIB ${V_SOURCES}")
+
+    set(VERILATOR_ROOT ${VERILATOR_HOME_${TAG}})
+    find_package(verilator HINTS ${VERILATOR_ROOT})
+    if (NOT verilator_FOUND)
+      message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
+    endif()
+
+# SystemC dependencies
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+
+    list(GET V_SOURCES 0 TOP_V_FILE)
+    get_filename_component(V_SOURCE_WO_EXT ${TOP_V_FILE} NAME_WE)
+
+    # get_target_property(VERILATOR_ARGS ${RTL_LIB} VERILOG_ARGS)
+    add_library(${OUT_LIB} EXCLUDE_FROM_ALL)
+    verilate(${OUT_LIB} SYSTEMC
+        SOURCES ${V_SOURCES}
+        PREFIX ${V_SOURCE_WO_EXT}
+        VERILATOR_ARGS --pins-sc-uint --trace --trace-structs -Wno-fatal ${V_ARGS}
+            )
+
+        target_include_directories(${OUT_LIB} PRIVATE "${SYSTEMC_HOME_${TAG}}/include")
+        target_link_libraries(${OUT_LIB} PRIVATE ${systemc_lib})
+        target_link_options(${OUT_LIB} PRIVATE -pthread)
+
+endfunction()
+
+function(verilate_tb SC_LIB RTL_LIBS)
+    message(STATUS "SC_LIB: ${SC_LIB}")
+    message(STATUS "RTL_LIBS: ${RTL_LIBS}")
+
+    find_file(libs_conf_cmake "libs_conf.cmake"
+        PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    include(${libs_conf_cmake})
 
     set(TAG OPEN)
     find_library(uvc_lib uvc
@@ -48,37 +92,9 @@ function(verilator)
         "${UVC_HOME_${TAG}}/include" 
         )
 
-    set(VERILATOR_ROOT ${VERILATOR_HOME_${TAG}})
-    find_package(verilator HINTS ${VERILATOR_ROOT})
-    if (NOT verilator_FOUND)
-      message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
-    endif()
-
-# SystemC dependencies
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
-
-    list(GET V_SOURCES 0 TOP_V_FILE)
-    get_filename_component(V_SOURCE_WO_EXT ${TOP_V_FILE} NAME_WE)
-
-    add_library(verilated_lib EXCLUDE_FROM_ALL)
-    verilate(verilated_lib SYSTEMC
-            SOURCES ${V_SOURCES}
-            PREFIX ${V_SOURCE_WO_EXT}
-            VERILATOR_ARGS --pins-sc-uint --trace -no-trace-params --trace-structs -Wno-fatal
-            )
-
-    target_include_directories(verilated_lib PRIVATE "${SYSTEMC_HOME_${TAG}}/include")
-    target_link_libraries(verilated_lib PRIVATE ${systemc_lib})
-    target_link_options(verilated_lib PRIVATE -pthread)
-
-    get_target_property(ENV_SOURCES ${PROJECT_NAME} INTERFACE_SOURCES)
-    get_target_property(ENV_INC_DIR ${PROJECT_NAME} INTERFACE_INCLUDE_DIRECTORIES)
-    get_target_property(ENV_COMP_OPT ${PROJECT_NAME} INTERFACE_COMPILE_OPTIONS)
-
-    message(DEBUG "INTERACE SOURCES ${ENV_SOURCES}")
-    message(DEBUG "INTERFACE INC_DIR ${ENV_INC_DIR}")
-    message(DEBUG "ENV COMP OPT ${ENV_COMP_OPT}")
+    get_target_property(ENV_SOURCES ${SC_LIB} INTERFACE_SOURCES)
+    get_target_property(ENV_INC_DIR ${SC_LIB} INTERFACE_INCLUDE_DIRECTORIES)
+    get_target_property(ENV_COMP_OPT ${SC_LIB} INTERFACE_COMPILE_OPTIONS)
 
     add_executable(verilator_tb EXCLUDE_FROM_ALL
                     ${ENV_SOURCES})
@@ -95,18 +111,25 @@ function(verilator)
                                )
 
     target_link_libraries(verilator_tb PRIVATE
-                          verilated_lib  
+                          ${RTL_LIBS} 
                           ${EXTRA_LIBS}
                         )
-if(DEFINED ENV{LD_LIBRARY_PATH})
-    set(RUN_PATH "LD_LIBRARY_PATH=${GLIB_DIR}:$ENV{LD_LIBRARY_PATH}")
-else()
-    set(RUN_PATH "LD_LIBRARY_PATH=${GLIB_DIR}")
-endif()
+
+    if(DEFINED ENV{LD_LIBRARY_PATH})
+        set(RUN_PATH "LD_LIBRARY_PATH=${GLIB_DIR}:$ENV{LD_LIBRARY_PATH}")
+    else()
+        set(RUN_PATH "LD_LIBRARY_PATH=${GLIB_DIR}")
+    endif()
+
+    get_target_property(RUN_ARGS ${PROJECT_NAME} RUN_ARGS)
+    if(RUN_ARGS STREQUAL "RUN_ARGS-NOTFOUND")
+        set(RUN_ARGS "")
+    endif()
+
     add_custom_target(run
         ${COMMAND} 
         ${CMAKE_COMMAND} -E env ${RUN_PATH}
-            ./verilator_tb
+            ./verilator_tb ${RUN_ARGS}
         DEPENDS verilator_tb)
                
 endfunction()

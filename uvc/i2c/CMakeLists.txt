@@ -21,6 +21,7 @@ target_sources(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} 
                 PUBLIC "${PROJECT_SOURCE_DIR}/inc"
+                PUBLIC "${PROJECT_SOURCE_DIR}/../common/inc"
                 PUBLIC ${LIB_INCLUDES}
                 )
 

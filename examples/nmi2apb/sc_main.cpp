@@ -7,9 +7,6 @@
 
 #include "env.h"
 
-#ifdef VERILATOR
-#include "verilated.h"
-#endif
 
 
 int sc_main(int argc, char **argv) {

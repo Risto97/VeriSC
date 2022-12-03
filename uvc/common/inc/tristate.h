@@ -1,3 +1,6 @@
+#ifndef _UVC_TRISTATE_H_
+#define _UVC_TRISTATE_H_
+
 #include <systemc>
 
 namespace uvc{
@@ -27,3 +30,5 @@ namespace uvc{
       }
     };
 }
+
+#endif

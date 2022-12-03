@@ -35,6 +35,19 @@ namespace uvc::apb{
 
         }
 
+    void trace(sc_core::sc_trace_file *wf){
+        std::string name = this->name();
+        sc_trace(wf, paddr, name + "_paddr");
+        sc_trace(wf, psel, name + "_psel");
+        sc_trace(wf, penable,  name + "_penable");
+        sc_trace(wf, pwrite, name + "_pwrite");
+        sc_trace(wf, pready, name + "_pready");
+        sc_trace(wf, prdata, name + "_prdata");
+        sc_trace(wf, pstrb, name + "_pstrb");
+        sc_trace(wf, pwdata, name + "_pwdata");
+        sc_trace(wf, pslverr, name + "_pslverr");
+    }
+
     };
 
     using Intf = intf<32, 32>;
