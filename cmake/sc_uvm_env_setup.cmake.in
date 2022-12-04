@@ -36,7 +36,7 @@ function(make_tb SC_LIB RTL_LIBS)
 endfunction()
 
 add_custom_target(graphviz
-    # COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/graphviz
+    COMMAND ${CMAKE_COMMAND} -E copy $ENV{SC_UVM_ENV_HOME}/cmake/CMakeGraphVizOptions.cmake ${CMAKE_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} "--graphviz=graphviz/foo.dot" .
     COMMAND python3 $ENV{SC_UVM_ENV_HOME}/scripts/graphviz_shorten_path.py -f "${CMAKE_BINARY_DIR}/graphviz/foo.dot" -o "${CMAKE_BINARY_DIR}/graphviz/out.dot" -l
     COMMAND dot -Tpng "${CMAKE_BINARY_DIR}/graphviz/out.dot" -o graph.png

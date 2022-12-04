@@ -125,6 +125,10 @@ configure_file(
     @ONLY
     )
 install(
+    FILES "${PROJECT_SOURCE_DIR}/cmake/CMakeGraphVizOptions.cmake"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+  )
+install(
     FILES "${PROJECT_SOURCE_DIR}/scripts/graphviz_shorten_path.py"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/scripts"
   )
