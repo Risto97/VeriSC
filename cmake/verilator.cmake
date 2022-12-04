@@ -1,9 +1,23 @@
 function(verilate_rtl OUT_LIB RTL_LIB)
     get_target_property(V_SOURCES ${RTL_LIB} INTERFACE_V_SOURCES)
-    get_target_property(V_ARGS ${RTL_LIB} VERILOG_ARGS)
+    get_target_property(VLT_CFG_FILES ${RTL_LIB} VERILATOR_CFG_FILES)
+    get_target_property(VLT_ARGS ${RTL_LIB} VERILATOR_ARGS)
+    get_target_property(V_DEFS ${RTL_LIB} VERILOG_DEFS)
 
-    if(V_ARGS STREQUAL "V_ARGS-NOTFOUND")
-        set(V_ARGS "")
+    if(VLT_ARGS STREQUAL "VLT_ARGS-NOTFOUND")
+        set(VLT_ARGS "")
+    endif()
+
+    if(VLT_CFG_FILES STREQUAL "VLT_CFG_FILES-NOTFOUND")
+        set(VLT_CFG_FILES "")
+    endif()
+
+    if(V_DEFS STREQUAL "V_DEFS-NOTFOUND")
+        set(V_DEFS "")
+    else()
+        foreach(def ${V_DEFS})
+            list(APPEND VLT_DEFS -D${def})
+        endforeach()
     endif()
 
     set(TAG OPEN)
@@ -32,12 +46,12 @@ function(verilate_rtl OUT_LIB RTL_LIB)
     list(GET V_SOURCES 0 TOP_V_FILE)
     get_filename_component(V_SOURCE_WO_EXT ${TOP_V_FILE} NAME_WE)
 
-    # get_target_property(VERILATOR_ARGS ${RTL_LIB} VERILOG_ARGS)
+    # get_target_property(VERILATOR_ARGS ${RTL_LIB} VERILATOR_ARGS)
     add_library(${OUT_LIB} EXCLUDE_FROM_ALL)
     verilate(${OUT_LIB} SYSTEMC
-        SOURCES ${V_SOURCES}
+        SOURCES ${V_SOURCES} ${VLT_CFG_FILES}
         PREFIX ${V_SOURCE_WO_EXT}
-        VERILATOR_ARGS --pins-sc-uint --trace --trace-structs -Wno-fatal ${V_ARGS}
+        VERILATOR_ARGS --pins-sc-uint --trace --trace-structs -Wno-fatal ${VLT_ARGS} ${VLT_DEFS}
             )
 
         target_include_directories(${OUT_LIB} PRIVATE "${SYSTEMC_HOME_${TAG}}/include")
@@ -47,8 +61,6 @@ function(verilate_rtl OUT_LIB RTL_LIB)
 endfunction()
 
 function(verilate_tb SC_LIB RTL_LIBS)
-    message(STATUS "SC_LIB: ${SC_LIB}")
-    message(STATUS "RTL_LIBS: ${RTL_LIBS}")
 
     find_file(libs_conf_cmake "libs_conf.cmake"
         PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH
