@@ -124,6 +124,10 @@ configure_file(
     ${CMAKE_INSTALL_PREFIX}/sc_uvm_env_setup.cmake
     @ONLY
     )
+install(
+    FILES "${PROJECT_SOURCE_DIR}/scripts/graphviz_shorten_path.py"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/scripts"
+  )
 # install(FILES ${PROJECT_SOURCE_DIR}/cmake/sc_uvm_env_setup.cmake
 #     DESTINATION ${CMAKE_INSTALL_PREFIX}
 #     )

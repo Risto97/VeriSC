@@ -109,7 +109,9 @@ function(verilate_tb SC_LIB RTL_LIBS)
     get_target_property(ENV_COMP_OPT ${SC_LIB} INTERFACE_COMPILE_OPTIONS)
 
     add_executable(verilator_tb EXCLUDE_FROM_ALL
-                    ${ENV_SOURCES})
+        ${ENV_SOURCES}
+        )
+    add_dependencies(verilator_tb ${SC_LIB})
 
     target_compile_options(verilator_tb PRIVATE
                         -DVERILATOR=1
