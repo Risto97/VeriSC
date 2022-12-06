@@ -1,46 +1,31 @@
-cmake_minimum_required(VERSION 3.8)
-project(env VERSION 1.0)
+find_file(setup_fn "sc_uvm_env_setup.cmake"
+    PATHS "$ENV{SC_UVM_ENV_HOME}" NO_DEFAULT_PATH)
+include(${setup_fn})
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-# set(CMAKE_FIND_DEBUG_MODE 1)
+cmake_minimum_required(VERSION ${CMAKE_MIN_VERSION})
+project(nmi2apb_env VERSION 1.0)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_subdirectory(rtl "rtllib")
 
-# set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS "-DNDEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+add_library(${PROJECT_NAME} INTERFACE)
 
-set(USE_VERILATOR True)
+target_sources(${PROJECT_NAME} INTERFACE
+    "${PROJECT_SOURCE_DIR}/sc_main.cpp"
+    "${PROJECT_SOURCE_DIR}/env.cpp"
+    "${PROJECT_SOURCE_DIR}/scoreboard.cpp"
 
-set(CMAKE_PREFIX_PATH "$ENV{SC_UVM_ENV_HOME}")
-find_package(SC_UVM_env CONFIG REQUIRED)
-if (NOT SC_UVM_env_FOUND)
-    message(FATAL_ERROR "SystemC not found")
-endif()
+    "${PROJECT_SOURCE_DIR}/nmi_sequence.cpp"
+    )
 
-list(APPEND EXTRA_LIBS "${SC_UVM_env_libs}")
-list(APPEND EXTRA_INCLUDES "${SC_UVM_env_include_dirs}")
+target_include_directories(${PROJECT_NAME} INTERFACE
+    ${PROJECT_SOURCE_DIR}
+    )
 
-add_subdirectory(rtl)
+target_compile_options(${PROJECT_NAME} INTERFACE
+    -O3
+    -DNDEBUG
+    )
 
-add_executable(${PROJECT_NAME} 
-                "${PROJECT_SOURCE_DIR}/src/sc_main.cpp"
-                "${PROJECT_SOURCE_DIR}/src/env.cpp"
-                "${PROJECT_SOURCE_DIR}/src/scoreboard.cpp"
-               )
-
-
-target_include_directories(${PROJECT_NAME} 
-                PRIVATE "${EXTRA_INCLUDES}"
-                # ENV INCLUDES
-                PRIVATE "inc"
-                )
-
-target_link_libraries(${PROJECT_NAME} 
-                      PRIVATE rtl
-                      PRIVATE ${EXTRA_LIBS}
-                     )
-
+make_rtl(rtl_lib nmi2apb_rtl)
+make_tb(${PROJECT_NAME} "rtl_lib")

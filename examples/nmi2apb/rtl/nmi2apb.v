@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module nmi2apb (
     input   wire clk_i,
     input   wire rst_ni,

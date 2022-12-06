@@ -1,0 +1,14 @@
+--- src/tools_install-build/src/verilator/verilator-config.cmake.in	2022-11-15 18:34:47.232891093 +0100
++++ src/tools_install-build/src/verilator/verilator-config.cmake.in_mod	2022-11-15 19:08:30.997180437 +0100
+@@ -21,9 +21,8 @@
+ 
+ cmake_minimum_required(VERSION 3.8)
+ 
+-# Prefer VERILATOR_ROOT from environment
+-if (DEFINED ENV{VERILATOR_ROOT})
+-  set(VERILATOR_ROOT "$ENV{VERILATOR_ROOT}" CACHE PATH "VERILATOR_ROOT")
++if (DEFINED VERILATOR_ROOT)
++  set(VERILATOR_ROOT "${VERILATOR_ROOT}" CACHE PATH "VERILATOR_ROOT")
+ endif()
+ 
+ set(VERILATOR_ROOT "${CMAKE_CURRENT_LIST_DIR}" CACHE PATH "VERILATOR_ROOT")

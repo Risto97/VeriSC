@@ -1,0 +1,44 @@
+set(USE_VCS @USE_VCS@)
+set(CMAKE_MIN_VERSION 3.25)
+set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
+
+find_file(gcc_conf_cmake "gcc_conf.cmake"
+    PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH)
+include(${gcc_conf_cmake})
+
+find_file(verilator_cmake "verilator.cmake"
+    PATHS "$ENV{SC_UVM_ENV_HOME}/cmake" NO_DEFAULT_PATH
+    NO_CACHE
+    )
+include(${verilator_cmake})
+
+if(USE_VCS)
+find_file(vcs_cmake "vcs.cmake"
+    PATHS "$ENV{SC_UVM_ENV_HOME}/cmake/synopsys" NO_DEFAULT_PATH
+    NO_CACHE
+    )
+include(${vcs_cmake})
+endif()
+
+function(make_rtl OUT_LIB RTL_LIB)
+    verilate_rtl(${OUT_LIB} ${RTL_LIB})
+    if(USE_VCS)
+        vcs_rtl(${OUT_LIB} ${RTL_LIB})
+    endif()
+    add_dependencies(${OUT_LIB} ${RTL_LIB})
+endfunction()
+
+function(make_tb SC_LIB RTL_LIBS)
+    verilate_tb(${SC_LIB} "${RTL_LIBS}")
+    if(USE_VCS)
+        vcs_tb(${SC_LIB} "${RTL_LIBS}")
+    endif()
+endfunction()
+
+add_custom_target(graphviz
+    COMMAND ${CMAKE_COMMAND} -E copy $ENV{SC_UVM_ENV_HOME}/cmake/CMakeGraphVizOptions.cmake ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} "--graphviz=graphviz/foo.dot" .
+    COMMAND python3 $ENV{SC_UVM_ENV_HOME}/scripts/graphviz_shorten_path.py -f "${CMAKE_BINARY_DIR}/graphviz/foo.dot" -o "${CMAKE_BINARY_DIR}/graphviz/out.dot" -l
+    COMMAND dot -Tpng "${CMAKE_BINARY_DIR}/graphviz/out.dot" -o graph.png
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+)
