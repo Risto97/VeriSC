@@ -68,6 +68,12 @@ function(verilate_tb SC_LIB RTL_LIBS)
         )
     include(${libs_conf_cmake})
 
+    find_file(crave_conf_cmake "crave_conf.cmake"
+        PATHS "$ENV{SC_UVM_ENV_HOME}/open/crave" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    include(${crave_conf_cmake})
+
     set(TAG OPEN)
     find_library(uvc_lib uvc
         PATHS "${UVC_HOME_${TAG}}/*"
@@ -86,12 +92,43 @@ function(verilate_tb SC_LIB RTL_LIBS)
         PATHS "${SCV_HOME_${TAG}}/*" NO_DEFAULT_PATH
         NO_CACHE
         )
+    find_library(crave_lib crave
+        PATHS "${CRAVE_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    find_library(z3_lib z3
+        PATHS "${Z3_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    find_library(cudd_lib cudd
+        PATHS "${CUDD_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    find_library(metaSMT_lib metaSMT
+        PATHS "${CRAVE_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    find_library(boost_system boost_system
+        PATHS "${BOOST_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
+    find_library(boost_fs boost_filesystem
+        PATHS "${BOOST_HOME_${TAG}}/*" NO_DEFAULT_PATH
+        NO_CACHE
+        )
 
-    list(APPEND EXTRA_LIBS 
-                ${systemc_lib_sci}
-                ${sc_uvm_lib}
-                ${scv_lib}
+    list(APPEND EXTRA_LIBS          # order is important
                 ${uvc_lib}
+                ${crave_lib}
+                # ${scv_lib}
+                ${sc_uvm_lib}
+                ${systemc_lib_sci}
+                ${metaSMT_lib}
+                ${z3_lib}
+                ${cudd_lib}
+                ${boost_fs}
+                ${boost_system}
+                -fopenmp
                 )
 
     list(APPEND EXTRA_INCLUDES 
@@ -100,6 +137,7 @@ function(verilate_tb SC_LIB RTL_LIBS)
         "${SCV_HOME_${TAG}}/include"
         "${FC4SC_HOME_${TAG}}/includes"
         "${SCT_HOME_${TAG}}/components/common/sctcommon/"
+        "${CRAVE_HOME_${TAG}}/include" 
 
         "${UVC_HOME_${TAG}}/include" 
         )

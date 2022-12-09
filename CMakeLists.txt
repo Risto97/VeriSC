@@ -1,15 +1,10 @@
 cmake_minimum_required(VERSION 3.12)
 project(SC_UVM_env VERSION 1.0.0)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    message(WARNING "Please define installation directonry by calling cmake with -DCMAKE_INSTALL_PREFIX=<installation-path>
-    Using default directory ${PROJECT_BINARY_DIR}")
-    set(CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR})
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    message("Setting CMAKE_CXX_STANDART to 17")
+    set(CMAKE_CXX_STANDARD 11)
 endif()
-
-set(CMAKE_CXX_STANDARD 17)
 
 include(ExternalProject)
 
@@ -51,12 +46,14 @@ ExternalProject_Add(uvc
             SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
             BUILD_ALWAYS 1
             CMAKE_ARGS
+                # -DBUILD_SHARED_LIBS=OFF
+                # -DCMAKE_FIND_LIBRARY_SUFFIXES=.a
                 -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}/uvc
                 -DLIBS_CFG_DIR=${INSTALL_DIRECTORY}
                 -DINSTALL_GROUP=OPEN
                 -DCMAKE_INSTALL_LIBDIR=lib-linux64
                 -DCMAKE_INSTALL_INCLUDEDIR=include
-                -DCMAKE_CXX_STANDARD=14
+                -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
                 -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
                 -DCMAKE_C_COMPILER=${C_COMPILER}
                 -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}

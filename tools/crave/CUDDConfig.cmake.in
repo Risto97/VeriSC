@@ -1,0 +1,5 @@
+set(CUDD_VERSION ${CUDD_VERSION})
+# get_filename_component(CUDD_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
+set(CUDD_INCLUDE_DIRS ${CUDD_INSTALL_DIR}/include )
+set(CUDD_INCLUDE_DIR  ${CUDD_INSTALL_DIR}/include )
+set(CUDD_LIBRARIES    ${CUDD_INSTALL_DIR}/lib/libcudd.a )

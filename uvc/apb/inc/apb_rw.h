@@ -3,6 +3,7 @@
 
 #include <systemc>
 #include <uvm>
+#include <crave2uvm.h>
 
 namespace uvc::apb{
     typedef enum {
@@ -10,9 +11,10 @@ namespace uvc::apb{
         WRITE = 1
     } rw_enum;
 
-    class rw : public uvm::uvm_sequence_item {
+    class rw : public uvm_randomized_sequence_item {
         public:
-            sc_dt::sc_bv<32> addr;
+            sc_dt::sc_bv<32> addr; 
+            crave::crv_variable < sc_dt::sc_bv<32> > rnd;
             sc_dt::sc_bv<32> data;
             sc_dt::sc_bv<4>  strb;
             rw_enum kind_e;
@@ -22,7 +24,7 @@ namespace uvc::apb{
             UVM_OBJECT_UTILS(rw);
 
             rw(const std::string & name = "apb_rw") :
-                uvm::uvm_sequence_item(name) {}
+                uvm_randomized_sequence_item(name) {}
 
             virtual void do_print(const uvm::uvm_printer& printer) const;
             virtual void do_pack(uvm::uvm_packer& p) const;

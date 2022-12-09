@@ -9,6 +9,7 @@ endif()
 
 set(GROUP_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 
+set(TAG "OPEN")
 
 set(SYSTEMC_VERSION 2.3.3)
 set(SCV_VERSION 2.0.1)
@@ -20,6 +21,7 @@ set(ICSC_COMPILER_VERSION master)
 set(ICSC_COMPILER_INSTALL_DIR ${GROUP_INSTALL_DIR}/systemc-compiler-${ICSC_COMPILER_VERSION})
 
 set(SYSTEMC_INSTALL_DIR ${GROUP_INSTALL_DIR}/systemc-${SYSTEMC_VERSION})
+set(SYSTEMC_SRC_DIR ${PROJECT_BINARY_DIR}/src/systemc)
 ExternalProject_Add(systemc
     URL https://www.accellera.org/images/downloads/standards/systemc/systemc-${SYSTEMC_VERSION}.tar.gz
     PREFIX ${PROJECT_BINARY_DIR}
@@ -31,6 +33,22 @@ ExternalProject_Add(systemc
         -DENABLE_PHASE_CALLBACKS_TRACING=OFF
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        -DBUILD_SHARED_LIBS=ON
+    )
+ExternalProject_Add(systemc_static
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${SYSTEMC_SRC_DIR}
+    PREFIX ${PROJECT_BINARY_DIR}
+    INSTALL_DIR ${SYSTEMC_INSTALL_DIR}
+    CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${SYSTEMC_INSTALL_DIR}
+        -DCMAKE_INSTALL_LIBDIR=lib-linux64
+        -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+        -DENABLE_PHASE_CALLBACKS_TRACING=OFF
+        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        -DBUILD_SHARED_LIBS=OFF
+    DEPENDS systemc
     )
 
 set(SCV_INSTALL_DIR ${GROUP_INSTALL_DIR}/scv-${SCV_VERSION})
@@ -77,7 +95,26 @@ ExternalProject_Add(verilator
     INSTALL_COMMAND make install && ${CMAKE_COMMAND} -E copy_directory ${VERILATOR_INSTALL_DIR}/share/verilator/include ${VERILATOR_INSTALL_DIR}/include
     )
 
-set(TAG "OPEN")
+message("SYSTEMC_HOME: ${SYSTEMC_INSTALL_DIR} ()*)(*!#)(!*@#)(!@*#)(@!#*)")
+message("SYSTEMC_INSTALL_DIR: ${SYSTEMC_INSTALL_DIR} ()*)(*!#)(!*@#)(!@*#)(@!#*)")
+message("SYSTEMC_INSTALL_DIR: ${SYSTEMC_INSTALL_DIR} ()*)(*!#)(!*@#)(!@*#)(@!#*)")
+message("SYSTEMC_INSTALL_DIR: ${SYSTEMC_INSTALL_DIR} ()*)(*!#)(!*@#)(!@*#)(@!#*)")
+message("SYSTEMC_INSTALL_DIR: ${SYSTEMC_INSTALL_DIR} ()*)(*!#)(!*@#)(!@*#)(@!#*)")
+message("SYSTEMC_INSTALL_DIR: ${SYSTEMC_INSTALL_DIR} ()*)(*!#)(!*@#)(!@*#)(@!#*)")
+ExternalProject_Add(crave
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${PROJECT_SOURCE_DIR}/crave
+    PREFIX ${PROJECT_BINARY_DIR}
+    CMAKE_ARGS
+        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+        -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+        -DSYSTEMC_HOME=${SYSTEMC_INSTALL_DIR}
+        -DCMAKE_INSTALL_PREFIX=${GROUP_INSTALL_DIR}/crave
+        -DTAG=${TAG}
+    DEPENDS systemc_static
+    )
+
 configure_file(${PROJECT_SOURCE_DIR}/source.sh.in ${PROJECT_BINARY_DIR}/source.sh)
 configure_file(${PROJECT_SOURCE_DIR}/libs_conf.cmake.in ${PROJECT_BINARY_DIR}/libs_conf_${TAG}.cmake)
 

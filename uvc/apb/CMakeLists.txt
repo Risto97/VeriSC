@@ -8,6 +8,7 @@ include(${PROJECT_SOURCE_DIR}/../cmake/get_libs.cmake)
 # Create a new library
 add_library(${PROJECT_NAME} OBJECT)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 target_sources(${PROJECT_NAME} 
                 # ENV SOURCES
                 PRIVATE "src/apb_agent.cpp"
