@@ -6,11 +6,17 @@ find_file(gcc_conf_cmake "gcc_conf.cmake"
     PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH)
 include(${gcc_conf_cmake})
 
+if(NOT DEFINED USE_VERILATOR)
+    set(USE_VERILATOR 1)
+endif()
+
+if(USE_VERILATOR)
 find_file(verilator_cmake "verilator.cmake"
     PATHS "$ENV{SC_UVM_ENV_HOME}/cmake" NO_DEFAULT_PATH
     NO_CACHE
     )
 include(${verilator_cmake})
+endif()
 
 if(USE_VCS)
 find_file(vcs_cmake "vcs.cmake"
@@ -21,15 +27,19 @@ include(${vcs_cmake})
 endif()
 
 function(make_rtl OUT_LIB RTL_LIB)
+    if(USE_VERILATOR)
     verilate_rtl(${OUT_LIB} ${RTL_LIB})
+    add_dependencies(${OUT_LIB} ${RTL_LIB})
+    endif()
     if(USE_VCS)
         vcs_rtl(${OUT_LIB} ${RTL_LIB})
     endif()
-    add_dependencies(${OUT_LIB} ${RTL_LIB})
 endfunction()
 
 function(make_tb SC_LIB RTL_LIBS)
+    if(USE_VERILATOR)
     verilate_tb(${SC_LIB} "${RTL_LIBS}")
+    endif()
     if(USE_VCS)
         vcs_tb(${SC_LIB} "${RTL_LIBS}")
     endif()
