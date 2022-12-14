@@ -26,7 +26,11 @@ find_file(vcs_cmake "vcs.cmake"
 include(${vcs_cmake})
 endif()
 
+include("$ENV{SC_UVM_ENV_HOME}/cmake/flatten_rtl_lib.cmake")
 function(make_rtl OUT_LIB RTL_LIB)
+    # Recursively append all includes, sources, defines, cfg_files...
+    flatten_rtl_lib(${RTL_LIB})
+
     if(USE_VERILATOR)
     verilate_rtl(${OUT_LIB} ${RTL_LIB})
     add_dependencies(${OUT_LIB} ${RTL_LIB})

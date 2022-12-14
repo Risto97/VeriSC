@@ -1,9 +1,6 @@
 include("$ENV{SC_UVM_ENV_HOME}/cmake/flatten_rtl_lib.cmake")
 
 function(verilate_rtl OUT_LIB RTL_LIB)
-    # Recursively append all includes, sources, defines, cfg_files...
-    flatten_rtl_lib(${RTL_LIB})
-
     get_interface_sources(V_SOURCES ${RTL_LIB})
     safe_get_target_property(VLT_CFG_FILES ${RTL_LIB} VERILATOR_CFG_FILES "")
     safe_get_target_property(VLT_ARGS ${RTL_LIB} VERILATOR_ARGS "")
