@@ -117,13 +117,25 @@ else()
 endif()
                 #
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
-# configure_file(${PROJECT_SOURCE_DIR}/cmake/sc_uvm_env_setup.cmake.in ${PROJECT_BINARY_DIR}/sc_uvm_env_setup.cmake)
 configure_file(
     ${PROJECT_SOURCE_DIR}/cmake/sc_uvm_env_setup.cmake.in
     ${CMAKE_INSTALL_PREFIX}/sc_uvm_env_setup.cmake
     @ONLY
     )
+install(
+    FILES "${PROJECT_SOURCE_DIR}/cmake/safe_get_target_property.cmake"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+  )
+install(
+    FILES "${PROJECT_SOURCE_DIR}/cmake/flatten_rtl_lib.cmake"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+  )
+install(
+    FILES "${PROJECT_SOURCE_DIR}/cmake/verilator.cmake"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+  )
 install(
     FILES "${PROJECT_SOURCE_DIR}/cmake/CMakeGraphVizOptions.cmake"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
@@ -132,28 +144,3 @@ install(
     FILES "${PROJECT_SOURCE_DIR}/scripts/graphviz_shorten_path.py"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/scripts"
   )
-# install(FILES ${PROJECT_SOURCE_DIR}/cmake/sc_uvm_env_setup.cmake
-#     DESTINATION ${CMAKE_INSTALL_PREFIX}
-#     )
-
-
-set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
-message(STATUS "INSTALL_LIBDIR: ${config_install_dir}")
-
-include(CMakePackageConfigHelpers)
-
-install(
-    FILES "${PROJECT_SOURCE_DIR}/cmake/verilator.cmake"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
-  )
-  
-# uninstall target
-# if(NOT TARGET uninstall)
-#   configure_file(
-#     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-#     "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-#     IMMEDIATE @ONLY)
-#
-#   add_custom_target(uninstall
-#     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
-# endif()

@@ -1,22 +1,28 @@
+include("$ENV{SC_UVM_ENV_HOME}/cmake/flatten_rtl_lib.cmake")
+
 function(verilate_rtl OUT_LIB RTL_LIB)
-    get_target_property(V_SOURCES ${RTL_LIB} INTERFACE_V_SOURCES)
-    get_target_property(VLT_CFG_FILES ${RTL_LIB} VERILATOR_CFG_FILES)
-    get_target_property(VLT_ARGS ${RTL_LIB} VERILATOR_ARGS)
+    # Recursively append all includes, sources, defines, cfg_files...
+    flatten_rtl_lib(${RTL_LIB})
+
+    get_interface_sources(V_SOURCES ${RTL_LIB})
+    safe_get_target_property(VLT_CFG_FILES ${RTL_LIB} VERILATOR_CFG_FILES "")
+    safe_get_target_property(VLT_ARGS ${RTL_LIB} VERILATOR_ARGS "")
     get_target_property(V_DEFS ${RTL_LIB} VERILOG_DEFS)
-
-    if(VLT_ARGS STREQUAL "VLT_ARGS-NOTFOUND")
-        set(VLT_ARGS "")
-    endif()
-
-    if(VLT_CFG_FILES STREQUAL "VLT_CFG_FILES-NOTFOUND")
-        set(VLT_CFG_FILES "")
-    endif()
+    get_target_property(V_INC_DIRS ${RTL_LIB} INTERFACE_INCLUDE_DIRECTORIES)
 
     if(V_DEFS STREQUAL "V_DEFS-NOTFOUND")
         set(V_DEFS "")
     else()
         foreach(def ${V_DEFS})
             list(APPEND VLT_DEFS -D${def})
+        endforeach()
+    endif()
+
+    if(V_INC_DIRS STREQUAL "V_INC_DIRS-NOTFOUND")
+        set(V_INC_DIRS "")
+    else()
+        foreach(dir ${V_INC_DIRS})
+            list(APPEND VLT_INC_DIRS -I${dir})
         endforeach()
     endif()
 
@@ -51,7 +57,7 @@ function(verilate_rtl OUT_LIB RTL_LIB)
     verilate(${OUT_LIB} SYSTEMC
         SOURCES ${V_SOURCES} ${VLT_CFG_FILES}
         PREFIX ${V_SOURCE_WO_EXT}
-        VERILATOR_ARGS --pins-sc-uint --trace --trace-structs -Wno-fatal ${VLT_ARGS} ${VLT_DEFS}
+        VERILATOR_ARGS --pins-sc-uint --trace --trace-structs -Wno-fatal ${VLT_ARGS} ${VLT_DEFS} ${VLT_INC_DIRS}
             )
 
         target_include_directories(${OUT_LIB} PRIVATE "${SYSTEMC_HOME_${TAG}}/include")
