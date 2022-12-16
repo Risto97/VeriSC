@@ -1,20 +1,26 @@
+include("$ENV{SC_UVM_ENV_HOME}/cmake/flatten_rtl_lib.cmake")
+
 function(vcs_rtl OUT_LIB RTL_LIB)
-    get_target_property(V_SOURCES ${RTL_LIB} INTERFACE_V_SOURCES)
-    get_target_property(VCS_ARGS ${RTL_LIB} VCS_ARGS)
+    get_interface_sources(V_SOURCES ${RTL_LIB})
+    safe_get_target_property(VCS_ARGS ${RTL_LIB} VCS_ARGS "")
     get_target_property(V_DEFS ${RTL_LIB} VERILOG_DEFS)
 
     list(GET V_SOURCES 0 TOP_V_FILE)
     get_filename_component(V_SOURCE_WO_EXT ${TOP_V_FILE} NAME_WE)
-
-    if(VCS_ARGS STREQUAL "VCS_ARGS-NOTFOUND")
-        set(VCS_ARGS "")
-    endif()
 
     if(V_DEFS STREQUAL "V_DEFS-NOTFOUND")
         set(VCS_DEFS "")
     else()
         foreach(def ${V_DEFS})
             list(APPEND VCS_DEFS +define+${def})
+        endforeach()
+    endif()
+
+    if(V_INC_DIRS STREQUAL "V_INC_DIRS-NOTFOUND")
+        set(V_INC_DIRS "")
+    else()
+        foreach(dir ${V_INC_DIRS})
+            list(APPEND VCS_INC_DIRS -I${dir})
         endforeach()
     endif()
 
@@ -59,13 +65,8 @@ function(vcs_rtl OUT_LIB RTL_LIB)
     )
 
     set_property(TARGET ${OUT_LIB}
-        PROPERTY INTERFACE_V_SOURCES
-        ${V_SOURCES}
-        )
-
-    set_property(TARGET ${OUT_LIB}
-        PROPERTY VCS_DEFS
-        ${VCS_DEFS}
+        PROPERTY RTL_LIB
+        ${RTL_LIB}
         )
 
     add_custom_target(vlog_${OUT_LIB} 
@@ -75,6 +76,7 @@ function(vcs_rtl OUT_LIB RTL_LIB)
         APPEND PROPERTY ADDITIONAL_CLEAN_FILES ${PROJECT_BINARY_DIR}/csrc ${PROJECT_BINARY_DIR}/AN.DB
         )
     add_dependencies(vlog_${OUT_LIB} vlogan_copy_default_portmap_${RTL_LIB})
+    add_dependencies(vlog_${OUT_LIB} ${RTL_LIB})
 
 endfunction()
 
@@ -88,7 +90,8 @@ function(vcs_tb SC_LIB RTL_LIBS)
 
     set(CNT 1)
     foreach(lib ${RTL_LIBS})
-        get_target_property(LIB_V_SRCS ${lib} INTERFACE_V_SOURCES)
+        get_target_property(rtl_lib ${lib} RTL_LIB)
+        get_interface_sources(LIB_V_SRCS ${rtl_lib})
         if(CNT GREATER 1)
             list(POP_FRONT LIB_V_SRCS TOP_V_FILE) # Why this is needed, I have no idea
         endif()
@@ -101,13 +104,31 @@ function(vcs_tb SC_LIB RTL_LIBS)
         set(VCS_ARGS "")
     endif()
 
+    set(VCS_DEFS "")
     foreach(lib ${RTL_LIBS})
-        get_target_property(VCS_DEF ${lib} VCS_DEFS)
-        if(VCS_DEF STREQUAL "VCS_DEF-NOTFOUND")
-            set(VCS_DEF "")
+        get_target_property(rtl_lib ${lib} RTL_LIB)
+        get_target_property(V_DEFS ${rtl_lib} VERILOG_DEFS)
+        if(V_DEFS STREQUAL "V_DEFS-NOTFOUND")
+        else()
+            foreach(def ${V_DEFS})
+                list(APPEND VCS_DEFS +define+${def})
+            endforeach()
         endif()
-        list(APPEND VCS_DEFS ${VCS_DEF})
     endforeach()
+
+    set(VCS_INC_DIRS +incdir)
+    foreach(lib ${RTL_LIBS})
+        get_target_property(rtl_lib ${lib} RTL_LIB)
+        get_target_property(V_INC_DIRS ${rtl_lib} INTERFACE_INCLUDE_DIRECTORIES)
+        if(V_INC_DIRS STREQUAL "V_INC_DIRS-NOTFOUND")
+            set(V_INC_DIRS "")
+        else()
+            foreach(dir ${V_INC_DIRS})
+                string(APPEND VCS_INC_DIRS +${dir})
+            endforeach()
+        endif()
+    endforeach()
+
 
     get_target_property(ENV_SOURCES ${SC_LIB} INTERFACE_SOURCES)
     get_target_property(ENV_INC_DIR ${SC_LIB} INTERFACE_INCLUDE_DIRECTORIES)
@@ -190,6 +211,7 @@ function(vcs_tb SC_LIB RTL_LIBS)
                 -CFLAGS "${ENV_COMP_OPT_STR} -DVCS=1"
                 ${VCS_DEFS}
                 ${VCS_ARGS}
+                ${VCS_INC_DIRS}
                 +vcs+dumpvars+wave.vcd
                 -o vcs_tb
         DEPENDS vcscan
