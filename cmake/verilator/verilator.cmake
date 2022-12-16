@@ -6,63 +6,78 @@ function(verilate_rtl OUT_LIB RTL_LIB)
 
     get_interface_sources(V_SOURCES ${RTL_LIB})
     safe_get_target_property(VLT_CFG_FILES ${RTL_LIB} VERILATOR_CFG_FILES "")
-    safe_get_target_property(VLT_ARGS ${RTL_LIB} VERILATOR_ARGS "")
-    get_target_property(V_DEFS ${RTL_LIB} VERILOG_DEFS)
-    get_target_property(V_INC_DIRS ${RTL_LIB} INTERFACE_INCLUDE_DIRECTORIES)
+    safe_get_target_property(VERILATOR_ARGS ${RTL_LIB} VERILATOR_ARGS "")
+    safe_get_target_property(VERILOG_DEFS ${RTL_LIB} VERILOG_DEFS "")
+    safe_get_target_property(INCLUDE_DIRS ${RTL_LIB} INTERFACE_INCLUDE_DIRECTORIES "")
 
-    if(V_DEFS STREQUAL "V_DEFS-NOTFOUND")
-        set(V_DEFS "")
-    else()
-        foreach(def ${V_DEFS})
-            list(APPEND VLT_DEFS -D${def})
-        endforeach()
-    endif()
-
-    if(V_INC_DIRS STREQUAL "V_INC_DIRS-NOTFOUND")
-        set(V_INC_DIRS "")
-    else()
-        foreach(dir ${V_INC_DIRS})
-            list(APPEND VLT_INC_DIRS -I${dir})
-        endforeach()
-    endif()
-
-    set(TAG OPEN)
     find_file(libs_conf_cmake "libs_conf.cmake"
         PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH
         NO_CACHE
         )
+    set(TAG "OPEN")
     include(${libs_conf_cmake})
-
-    find_library(systemc_lib_sci systemc
+    find_library(systemc_lib systemc
         PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH
         NO_CACHE
         )
 
-
     set(VERILATOR_ROOT ${VERILATOR_HOME_${TAG}})
-    find_package(verilator HINTS ${VERILATOR_ROOT})
-    if (NOT verilator_FOUND)
-      message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
-    endif()
-
-# SystemC dependencies
-    set(THREADS_PREFER_PTHREAD_FLAG ON)
-    find_package(Threads REQUIRED)
 
     list(GET V_SOURCES 0 TOP_V_FILE)
     get_filename_component(V_SOURCE_WO_EXT ${TOP_V_FILE} NAME_WE)
+    set(TOP_MODULE ${V_SOURCE_WO_EXT})
 
-    # get_target_property(VERILATOR_ARGS ${RTL_LIB} VERILATOR_ARGS)
-    add_library(${OUT_LIB} EXCLUDE_FROM_ALL)
-    verilate(${OUT_LIB} SYSTEMC
-        SOURCES ${V_SOURCES} ${VLT_CFG_FILES}
-        PREFIX ${V_SOURCE_WO_EXT}
-        VERILATOR_ARGS --pins-sc-uint --trace --trace-structs -Wno-fatal ${VLT_ARGS} ${VLT_DEFS} ${VLT_INC_DIRS}
-            )
+    include(ExternalProject)
 
-        target_include_directories(${OUT_LIB} PRIVATE "${SYSTEMC_HOME_${TAG}}/include")
-        target_link_libraries(${OUT_LIB} PRIVATE ${systemc_lib})
-        target_link_options(${OUT_LIB} PRIVATE -pthread)
+    string(REPLACE ";" "|" V_SOURCES "${V_SOURCES}")
+    string(REPLACE ";" "|" INCLUDE_DIRS "${INCLUDE_DIRS}")
+    string(REPLACE ";" "|" VERILOG_DEFS "${VERILOG_DEFS}")
+    string(REPLACE ";" "|" VLT_CFG_FILES "${VLT_CFG_FILES}")
+    string(REPLACE ";" "|" VERILATOR_ARGS "${VERILATOR_ARGS}")
+    set(EXT_PRJ ${TOP_MODULE}_vlt)
+    ExternalProject_Add(${EXT_PRJ}
+        DOWNLOAD_COMMAND ""
+        SOURCE_DIR "$ENV{SC_UVM_ENV_HOME}/cmake/verilator"
+        PREFIX ${PROJECT_BINARY_DIR}/${EXT_PRJ}
+        BINARY_DIR ${PROJECT_BINARY_DIR}/${EXT_PRJ}
+        LIST_SEPARATOR |
+        BUILD_ALWAYS 1
+
+        CMAKE_ARGS
+            -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+
+            -DV_SOURCES=${V_SOURCES}
+            -DVLT_CFG_FILES=${VLT_CFG_FILES}
+            -DTOP_MODULE=${TOP_MODULE}
+            -DVERILATOR_ARGS=${VERILATOR_ARGS}
+            -DVERILOG_DEFS=${VERILOG_DEFS}
+            -DINCLUDE_DIRS=${INCLUDE_DIRS}
+
+            -DVERILATOR_ROOT=${VERILATOR_ROOT}
+            -DSYSTEMC_HOME=${SYSTEMC_HOME_${TAG}}
+            -DSYSTEMC_LIB=${systemc_lib}
+
+        INSTALL_COMMAND ""
+        DEPENDS ${RTL_LIB}
+        EXCLUDE_FROM_ALL 1
+        ) 
+
+    set(LIB_A "${PROJECT_BINARY_DIR}/${EXT_PRJ}/lib${TOP_MODULE}.a")
+    set(INC_DIR "${PROJECT_BINARY_DIR}/${EXT_PRJ}/${EXT_PRJ}")
+    
+    add_library(tmp_${TOP_MODULE} STATIC IMPORTED)
+    add_dependencies(tmp_${TOP_MODULE} ${EXT_PRJ})
+    set_target_properties(tmp_${TOP_MODULE} PROPERTIES IMPORTED_LOCATION ${LIB_A})
+
+    add_library(${OUT_LIB} INTERFACE)
+    target_include_directories(${OUT_LIB} INTERFACE ${INC_DIR})
+    target_include_directories(${OUT_LIB} INTERFACE
+        "${VERILATOR_ROOT}/include"
+        "${VERILATOR_ROOT}/include/vltstd")
+
+    target_link_libraries(${OUT_LIB} INTERFACE tmp_${TOP_MODULE})
 
 endfunction()
 

@@ -12,7 +12,7 @@ endif()
 
 if(USE_VERILATOR)
 find_file(verilator_cmake "verilator.cmake"
-    PATHS "$ENV{SC_UVM_ENV_HOME}/cmake" NO_DEFAULT_PATH
+    PATHS "$ENV{SC_UVM_ENV_HOME}/cmake/verilator" NO_DEFAULT_PATH
     NO_CACHE
     )
 include(${verilator_cmake})

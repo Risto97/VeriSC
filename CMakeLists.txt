@@ -133,8 +133,13 @@ install(
     DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
   )
 install(
-    FILES "${PROJECT_SOURCE_DIR}/cmake/verilator.cmake"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+    FILES "${PROJECT_SOURCE_DIR}/cmake/verilator/verilator.cmake"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake/verilator"
+  )
+install(
+    FILES "${PROJECT_SOURCE_DIR}/cmake/verilator/verilator_ext_prj.cmake"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake/verilator"
+    RENAME CMakeLists.txt
   )
 install(
     FILES "${PROJECT_SOURCE_DIR}/cmake/CMakeGraphVizOptions.cmake"
