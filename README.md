@@ -139,6 +139,7 @@ In order to install VeriSC you need to follow these steps:
    ```
 2. Make a build directory
    ```sh
+   cd VeriSC
    mkdir build
    ```
 3. Invoke CMake to configure the build, provide CMAKE_INSTALL_PREFIX=\<path\> pointing to the path you want VeriSC installed, optional variables are VCS_HOME=\<path-to-vcs\> that points to your VCS installation directory and CMAKE_CXX_STANDARD=[11,14,17,20] specifying the C++ standard in which to compile the libraries
