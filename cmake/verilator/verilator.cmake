@@ -142,15 +142,16 @@ function(verilate_tb SC_LIB RTL_LIBS)
                                ${EXTRA_INCLUDES}
                                )
 
+
     target_link_libraries(verilator_tb PRIVATE
                           ${RTL_LIBS} 
                           ${EXTRA_LIBS}
                         )
-
-    if(DEFINED ENV{LD_LIBRARY_PATH})
-        set(RUN_PATH "LD_LIBRARY_PATH=${GLIB_DIR}:$ENV{LD_LIBRARY_PATH}")
-    else()
-        set(RUN_PATH "LD_LIBRARY_PATH=${GLIB_DIR}")
+    if(DEFINED LIBSTDCPP_DIR)    # IF non system GCC is used set RPATH for libstdc++
+       set_target_properties(verilator_tb PROPERTIES
+          BUILD_WITH_INSTALL_RPATH TRUE
+          INSTALL_RPATH_USE_LINK_PATH TRUE
+          INSTALL_RPATH "${LIBSTDCPP_DIR}:${INSTALL_RPATH}")
     endif()
 
     get_target_property(RUN_ARGS ${PROJECT_NAME} RUN_ARGS)
@@ -159,9 +160,7 @@ function(verilate_tb SC_LIB RTL_LIBS)
     endif()
 
     add_custom_target(run
-        ${COMMAND} 
-        ${CMAKE_COMMAND} -E env ${RUN_PATH}
-            ./verilator_tb ${RUN_ARGS}
+        ${COMMAND} ./verilator_tb ${RUN_ARGS}
         DEPENDS verilator_tb)
                
 endfunction()

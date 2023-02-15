@@ -7,7 +7,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
 		cmake_policy(SET CMP0135 NEW)
 endif()
 
-set(CMAKE_SYSTEM_MIC_CLUSTER "Linux-3.10.0-1160.71.1.el7.x86_64")
+set(CMAKE_SYSTEM_MIC_CLUSTER "Linux-3.10.0-1160.80.1.el7.x86_64")
 message("-- CMAKE_SYSTEM:           ${CMAKE_SYSTEM}")
 
 string (REGEX MATCH "\\.el[1-9]" os_version_suffix ${CMAKE_SYSTEM})
@@ -73,6 +73,12 @@ elseif(NOT DOWNLOAD_GCC_BINARY AND NOT COMPILE_GCC) # GCC on system is compatibl
 endif()
 
 set(TAG "OPEN")
+if(DOWNLOAD_GCC_BINARY OR COMPILE_GCC)
+    set(SET_STDLIBCPP_DIR 1)
+else()
+    set(SET_STDLIBCPP_DIR 0)
+endif()
+
 configure_file(${PROJECT_SOURCE_DIR}/gcc_conf.cmake.in ${PROJECT_BINARY_DIR}/gcc_conf_${TAG}.cmake)
 
 install(FILES ${PROJECT_BINARY_DIR}/gcc_conf_${TAG}.cmake
