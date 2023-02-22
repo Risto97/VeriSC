@@ -20,6 +20,7 @@ function(verilate_rtl OUT_LIB RTL_LIB)
 
     set(VERILATOR_ROOT ${VERILATOR_HOME_${TAG}})
 
+    list(REVERSE V_SOURCES)
     list(GET V_SOURCES 0 TOP_V_FILE)
     get_filename_component(V_SOURCE_WO_EXT ${TOP_V_FILE} NAME_WE)
     set(TOP_MODULE ${V_SOURCE_WO_EXT})
@@ -68,7 +69,6 @@ function(verilate_rtl OUT_LIB RTL_LIB)
     add_dependencies(tmp_${TOP_MODULE} ${EXT_PRJ})
     set_target_properties(tmp_${TOP_MODULE} PROPERTIES IMPORTED_LOCATION ${LIB_A})
 
-    add_library(${OUT_LIB} INTERFACE)
     target_include_directories(${OUT_LIB} INTERFACE ${INC_DIR})
     target_include_directories(${OUT_LIB} INTERFACE
         "${VERILATOR_ROOT}/include"

@@ -29,10 +29,10 @@ endif()
 include("$ENV{SC_UVM_ENV_HOME}/cmake/flatten_rtl_lib.cmake")
 function(make_rtl OUT_LIB RTL_LIB)
     # Recursively append all includes, sources, defines, cfg_files...
-    flatten_rtl_lib(${RTL_LIB})
+    flat_rtl_lib(${RTL_LIB} ${OUT_LIB})
 
     if(USE_VERILATOR)
-    verilate_rtl(${OUT_LIB} ${RTL_LIB})
+    verilate_rtl(${OUT_LIB} ${OUT_LIB})
     add_dependencies(${OUT_LIB} ${RTL_LIB})
     endif()
     if(USE_VCS)
@@ -49,10 +49,12 @@ function(make_tb SC_LIB RTL_LIBS)
     endif()
 endfunction()
 
-add_custom_target(graphviz
-    COMMAND ${CMAKE_COMMAND} -E copy $ENV{SC_UVM_ENV_HOME}/cmake/CMakeGraphVizOptions.cmake ${CMAKE_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} "--graphviz=graphviz/foo.dot" .
-    COMMAND python3 $ENV{SC_UVM_ENV_HOME}/scripts/graphviz_shorten_path.py -f "${CMAKE_BINARY_DIR}/graphviz/foo.dot" -o "${CMAKE_BINARY_DIR}/graphviz/out.dot" -l
-    COMMAND dot -Tpng "${CMAKE_BINARY_DIR}/graphviz/out.dot" -o graph.png
-    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-)
+if(NOT TARGET graphviz)
+    add_custom_target(graphviz
+        COMMAND ${CMAKE_COMMAND} -E copy $ENV{SC_UVM_ENV_HOME}/cmake/CMakeGraphVizOptions.cmake ${CMAKE_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} "--graphviz=graphviz/foo.dot" .
+        COMMAND python3 $ENV{SC_UVM_ENV_HOME}/scripts/graphviz_shorten_path.py -f "${CMAKE_BINARY_DIR}/graphviz/foo.dot" -o "${CMAKE_BINARY_DIR}/graphviz/out.dot" -l
+        COMMAND dot -Tpng "${CMAKE_BINARY_DIR}/graphviz/out.dot" -o graph.png
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
+endif()
