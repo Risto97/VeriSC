@@ -5,6 +5,7 @@ function(vcs_rtl OUT_LIB RTL_LIB)
     safe_get_target_property(VCS_ARGS ${RTL_LIB} VCS_ARGS "")
     get_target_property(V_DEFS ${RTL_LIB} VERILOG_DEFS)
 
+    list(REVERSE V_SOURCES)
     list(GET V_SOURCES 0 TOP_V_FILE)
     get_filename_component(V_SOURCE_WO_EXT ${TOP_V_FILE} NAME_WE)
 
