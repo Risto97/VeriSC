@@ -122,23 +122,15 @@ function(verilate_tb SC_LIB RTL_LIBS)
         "${UVC_HOME_${TAG}}/include" 
         )
 
-    get_target_property(ENV_SOURCES ${SC_LIB} INTERFACE_SOURCES)
-    get_target_property(ENV_INC_DIR ${SC_LIB} INTERFACE_INCLUDE_DIRECTORIES)
-    get_target_property(ENV_COMP_OPT ${SC_LIB} INTERFACE_COMPILE_OPTIONS)
-
     add_executable(verilator_tb EXCLUDE_FROM_ALL
-        ${ENV_SOURCES}
         )
-    add_dependencies(verilator_tb ${SC_LIB})
 
     target_compile_options(verilator_tb PRIVATE
                         -DVERILATOR=1
-                        ${ENV_COMP_OPT}
                         )
     target_link_options(verilator_tb PRIVATE -pthread)
 
     target_include_directories(verilator_tb PRIVATE
-                               ${ENV_INC_DIR}
                                ${EXTRA_INCLUDES}
                                )
 
@@ -146,6 +138,7 @@ function(verilate_tb SC_LIB RTL_LIBS)
     target_link_libraries(verilator_tb PRIVATE
                           ${RTL_LIBS} 
                           ${EXTRA_LIBS}
+                          ${SC_LIB}
                         )
     if(DEFINED LIBSTDCPP_DIR)    # IF non system GCC is used set RPATH for libstdc++
        set_target_properties(verilator_tb PROPERTIES
