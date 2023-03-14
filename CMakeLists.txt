@@ -18,9 +18,11 @@ endif()
 include(ExternalProject)
 
 if(DEFINED GCC_HOME)
-    set(GCC_COMPILER ${GCC_HOME}/bin/g++)
+    set(CXX_COMPILER ${GCC_HOME}/bin/g++)
+    set(C_COMPILER ${GCC_HOME}/bin/gcc)
 else()
-    set(GCC_COMPILER ${CMAKE_CXX_COMPILER})
+    set(CXX_COMPILER ${CMAKE_CXX_COMPILER})
+    set(C_COMPILER ${CMAKE_C_COMPILER})
 endif()
 ExternalProject_Add(gcc_install
             DOWNLOAD_COMMAND ""
@@ -32,7 +34,8 @@ ExternalProject_Add(gcc_install
                 -DGCC_VERSION=${GCC_VERSION}
                 -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
                 -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
-                -DCMAKE_CXX_COMPILER=${GCC_COMPILER}
+                -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
+                -DCMAKE_C_COMPILER=${C_COMPILER}
             )
 
 
@@ -70,8 +73,10 @@ if((NOT UVM-SYSTEMC_VERSION STREQUAL "FALSE") AND (NOT SCV_VERSION STREQUAL "FAL
                 )
 endif()
 
-if(NOT DEFINED VCS_HOME AND NOT DEFINED ENV{VCS_HOME})
-    message(WARNING "VCS libraries will not be compiled, VCS will not be used, run cmake with -DVCS_HOME=<path to vcs> or set environment variable VCS_HOME")
+# if(NOT DEFINED VCS_HOME AND NOT DEFINED ENV{VCS_HOME})
+    # message(WARNING "VCS libraries will not be compiled, VCS will not be used, run cmake with -DVCS_HOME=<path to vcs> or set environment variable VCS_HOME")
+if(1)
+    message(WARNING "VCS IS DISABLED AT THE MOMENT")
     set(USE_VCS FALSE)
 else()
     set(USE_VCS TRUE)
@@ -171,6 +176,7 @@ install(FILES
 if(DEFINED VERISC_CFG)
     install(FILES 
         ${VERISC_CFG}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/user_config.cmake
+        DESTINATION ${CMAKE_INSTALL_PREFIX}
+        RENAME user_config.cmake
         )
 endif()
