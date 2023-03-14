@@ -1,3 +1,12 @@
+find_package(gcc CONFIG REQUIRED
+    PATHS ${VERISC_INSTALL_DIR}/*
+    NO_DEFAULT_PATH
+    )
+include(${CMAKE_CURRENT_LIST_DIR}/../verisc_config.cmake)
+if(NOT VERISC_CFG STREQUAL "")
+    include(${VERISC_CFG})
+endif()
+
 cmake_minimum_required(VERSION 3.20)
 project(tools_install)
 
@@ -10,108 +19,37 @@ endif()
 set(GROUP_INSTALL_DIR ${CMAKE_INSTALL_PREFIX})
 
 
-set(SYSTEMC_VERSION 2.3.3)
-set(SCV_VERSION 2.0.1)
-set(UVM_VERSION 1.0-beta4)
 set(PO4A_VERSION 0.69)
 set(HELP2MAN_VERSION 1.49.3)
-set(VERILATOR_VERSION 5.006)
-set(FC4SC_VERSION master)
-set(ICSC_COMPILER_VERSION master)
 
 set(ICSC_COMPILER_INSTALL_DIR ${GROUP_INSTALL_DIR}/systemc-compiler-${ICSC_COMPILER_VERSION})
 
-set(SYSTEMC_INSTALL_DIR ${GROUP_INSTALL_DIR}/systemc-${SYSTEMC_VERSION})
-ExternalProject_Add(systemc
-    URL https://www.accellera.org/images/downloads/standards/systemc/systemc-${SYSTEMC_VERSION}.tar.gz
-    PREFIX ${PROJECT_BINARY_DIR}
-    INSTALL_DIR ${SYSTEMC_INSTALL_DIR}
-    CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${SYSTEMC_INSTALL_DIR}
-        -DCMAKE_INSTALL_LIBDIR=lib-linux64
-        -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
-        -DENABLE_PHASE_CALLBACKS_TRACING=OFF
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-    )
-
-set(SCV_INSTALL_DIR ${GROUP_INSTALL_DIR}/scv-${SCV_VERSION})
-set(SCV_SRC_DIR ${PROJECT_BINARY_DIR}/src/scv)
-set(SCV_CXX "${CMAKE_CXX_COMPILER} -std=c++${CMAKE_CXX_STANDARD}")
-message(status "SCV_COMPILER: ${SCV_CXX}")
-ExternalProject_Add(scv
-    URL https://www.accellera.org/images/downloads/standards/systemc/scv-${SCV_VERSION}.tar.gz
-    PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND autoreconf -fiv ${SCV_SRC_DIR} && ${SCV_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${SCV_CXX} CXXFLAGS=-std=c++${CMAKE_CXX_STANDARD} --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${SCV_INSTALL_DIR}
-    DEPENDS systemc
-    )
-
-set(UVM_INSTALL_DIR ${GROUP_INSTALL_DIR}/uvm-systemc-${UVM_VERSION})
-set(UVM_SRC_DIR ${PROJECT_BINARY_DIR}/src/uvm-systemc)
-ExternalProject_Add(uvm-systemc
-    URL https://www.accellera.org/images/downloads/standards/systemc/uvm-systemc-${UVM_VERSION}.tar.gz
-    PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND autoreconf -fiv ${UVM_SRC_DIR} && ${UVM_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=-std=c++${CMAKE_CXX_STANDARD} --with-systemc=${SYSTEMC_INSTALL_DIR} --prefix=${UVM_INSTALL_DIR}
-    DEPENDS systemc
-    )
-
-set(FC4SC_INSTALL_DIR ${GROUP_INSTALL_DIR}/fc4sc-${FC4SC_VERSION})
-set(FC4SC_SRC_DIR ${PROJECT_BINARY_DIR}/src/fc4sc)
-ExternalProject_Add(fc4sc
-    GIT_REPOSITORY https://github.com/amiq-consulting/fc4sc.git
-    GIT_TAG ${FC4SC_VERSION}
-    PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory ${FC4SC_SRC_DIR} ${FC4SC_INSTALL_DIR}
-    )
-
-
-set(PO4A_INSTALL_DIR ${GROUP_INSTALL_DIR}/po4a-${PO4A_VERSION})
-set(PO4A_SRC_DIR ${PROJECT_BINARY_DIR}/src/po4a)
-ExternalProject_Add(po4a
-    GIT_REPOSITORY https://github.com/mquinson/po4a.git
-    GIT_TAG v${PO4A_VERSION}
-    PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory ${PO4A_SRC_DIR} ${PO4A_INSTALL_DIR}
-    )
-
-set(HELP2MAN_INSTALL_DIR ${GROUP_INSTALL_DIR}/help2man-${HELP2MAN_VERSION})
-set(HELP2MAN_SRC_DIR ${PROJECT_BINARY_DIR}/src/help2man)
-message(STATUS "HELP2MAN_SRC_DIR ${HELP2MAN_SRC_DIR}")
-ExternalProject_Add(help2man
-    URL https://mirrors.kernel.org/gnu/help2man/help2man-${HELP2MAN_VERSION}.tar.xz
-    PREFIX ${PROJECT_BINARY_DIR}
-    CONFIGURE_COMMAND cd ${HELP2MAN_SRC_DIR} && autoconf --output ${HELP2MAN_SRC_DIR}/configure  ${HELP2MAN_SRC_DIR}/configure.ac && ${HELP2MAN_SRC_DIR}/configure --prefix=${HELP2MAN_INSTALL_DIR} && cd -
-    BUILD_COMMAND ""
-    INSTALL_COMMAND cd ${HELP2MAN_SRC_DIR} && PATH=${PO4A_INSTALL_DIR}:$ENV{PATH} PERLLIB=${PO4A_INSTALL_DIR}/lib:$ENV{PERLLIB} $(MAKE) install && cd -
-    DEPENDS po4a
-    )
+if((DEFINED SYSTEMC_HOME))
+    set(SYSTEMC_INSTALL_DIR ${SYSTEMC_HOME})
+else()
+    set(SYSTEMC_INSTALL_DIR ${GROUP_INSTALL_DIR}/systemc-${SYSTEMC_VERSION}) # This one is used by uvm and scv so its here
+endif()
 
 set(VERILATOR_INSTALL_DIR ${GROUP_INSTALL_DIR}/verilator-${VERILATOR_VERSION})
-set(VERILATOR_SRC_DIR ${PROJECT_BINARY_DIR}/src/verilator)
-message(STATUS "VERILATOR_SRC_DIR ${VERILATOR_SRC_DIR}")
-ExternalProject_Add(verilator
-    GIT_REPOSITORY https://github.com/verilator/verilator.git
-    GIT_TAG v${VERILATOR_VERSION}
-    PREFIX ${PROJECT_BINARY_DIR}
-    PATCH_COMMAND patch -N ${VERILATOR_SRC_DIR}/verilator-config.cmake.in -i ${PROJECT_SOURCE_DIR}/verilator-config.patch || true
-    CONFIGURE_COMMAND  autoconf --output ${VERILATOR_SRC_DIR}/configure ${VERILATOR_SRC_DIR}/configure.ac && ${VERILATOR_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} --prefix=${VERILATOR_INSTALL_DIR}
-    BUILD_COMMAND PATH=${HELP2MAN_INSTALL_DIR}/bin:$ENV{PATH} $(MAKE)
 
-    INSTALL_COMMAND make install && ${CMAKE_COMMAND} -E copy_directory ${VERILATOR_INSTALL_DIR}/share/verilator/include ${VERILATOR_INSTALL_DIR}/include
-    DEPENDS help2man
+add_subdirectory(systemc)
+
+if(NOT UVM-SYSTEMC_VERSION STREQUAL "FALSE")
+    add_subdirectory(uvm-systemc)
+endif()
+if(NOT SCV_VERSION STREQUAL "FALSE")
+    add_subdirectory(scv)
+endif()
+if(NOT FC4SC_VERSION STREQUAL "FALSE")
+    add_subdirectory(fc4sc)
+endif()
+
+add_subdirectory(verilator)
+
+
+
+install(
+    FILES "${PROJECT_SOURCE_DIR}/dummy_file_dont_delete"
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+    RENAME dummy_file_you_can_delete
     )
-
-set(TAG "OPEN")
-configure_file(${PROJECT_SOURCE_DIR}/source.sh.in ${PROJECT_BINARY_DIR}/source.sh)
-configure_file(${PROJECT_SOURCE_DIR}/libs_conf.cmake.in ${PROJECT_BINARY_DIR}/libs_conf_${TAG}.cmake)
-
-install(FILES ${PROJECT_BINARY_DIR}/source.sh
-        DESTINATION ${GROUP_INSTALL_DIR})
-install(FILES ${PROJECT_BINARY_DIR}/libs_conf_${TAG}.cmake
-        DESTINATION ${GROUP_INSTALL_DIR}
-        RENAME libs_conf.cmake
-        )

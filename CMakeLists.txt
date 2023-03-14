@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.12)
-project(SC_UVM_env VERSION 1.0.0)
+cmake_minimum_required(VERSION 3.25)
+project(veriSC VERSION 0.0.1)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -10,13 +10,18 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR})
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+include(${PROJECT_SOURCE_DIR}/verisc_config.cmake)
+if(DEFINED VERISC_CFG)
+    include(${VERISC_CFG})
+endif()
 
 include(ExternalProject)
 
-include("${PROJECT_SOURCE_DIR}/gcc/check_gcc_version.cmake")
-message(STATUS "FROM SCRIPT: ${CXX_COMPILER}")
-message(STATUS "FROM SCRIPT: ${C_COMPILER}")
+if(DEFINED GCC_HOME)
+    set(GCC_COMPILER ${GCC_HOME}/bin/g++)
+else()
+    set(GCC_COMPILER ${CMAKE_CXX_COMPILER})
+endif()
 ExternalProject_Add(gcc_install
             DOWNLOAD_COMMAND ""
             PREFIX ${PROJECT_BINARY_DIR}
@@ -25,10 +30,11 @@ ExternalProject_Add(gcc_install
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                 -DGCC_VERSION=${GCC_VERSION}
-                -DCOMPILE_GCC=${COMPILE_GCC}
-                -DDOWNLOAD_GCC_BINARY=${DOWNLOAD_GCC_BINARY}
                 -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+                -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+                -DCMAKE_CXX_COMPILER=${GCC_COMPILER}
             )
+
 
 set(INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX}/open)
 ExternalProject_Add(tools_install
@@ -38,32 +44,31 @@ ExternalProject_Add(tools_install
             BUILD_ALWAYS 1
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}
-                -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
-                -DCMAKE_C_COMPILER=${C_COMPILER}
+                -DVERISC_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}
                 -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+                -DVERISC_CFG=${VERISC_CFG}
                 -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
             DEPENDS gcc_install
             )
 
 
-ExternalProject_Add(uvc
-            DOWNLOAD_COMMAND ""
-            PREFIX ${PROJECT_BINARY_DIR}
-            SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
-            BUILD_ALWAYS 1
-            CMAKE_ARGS
-                -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}/uvc
-                -DLIBS_CFG_DIR=${INSTALL_DIRECTORY}
-                -DINSTALL_GROUP=OPEN
-                -DCMAKE_INSTALL_LIBDIR=lib-linux64
-                -DCMAKE_INSTALL_INCLUDEDIR=include
-                -DCMAKE_CXX_STANDARD=14
-                -DCMAKE_CXX_COMPILER=${CXX_COMPILER}
-                -DCMAKE_C_COMPILER=${C_COMPILER}
-                -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
-                -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
-            DEPENDS gcc_install tools_install
-            )
+
+if((NOT UVM-SYSTEMC_VERSION STREQUAL "FALSE") AND (NOT SCV_VERSION STREQUAL "FALSE") AND (NOT UVC_VERSION STREQUAL "FALSE"))
+    ExternalProject_Add(uvc
+                DOWNLOAD_COMMAND ""
+                PREFIX ${PROJECT_BINARY_DIR}
+                SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
+                BUILD_ALWAYS 1
+                CMAKE_ARGS
+                    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}/uvc
+                    -DLIBS_CFG_DIR=${INSTALL_DIRECTORY}
+                    -DCMAKE_INSTALL_INCLUDEDIR=include
+                    -DVERISC_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}
+                    -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+                    -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+                DEPENDS gcc_install tools_install
+                )
+endif()
 
 if(NOT DEFINED VCS_HOME AND NOT DEFINED ENV{VCS_HOME})
     message(WARNING "VCS libraries will not be compiled, VCS will not be used, run cmake with -DVCS_HOME=<path to vcs> or set environment variable VCS_HOME")
@@ -120,21 +125,21 @@ endif()
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-configure_file(
-    ${PROJECT_SOURCE_DIR}/cmake/sc_uvm_env_setup.cmake.in
-    ${CMAKE_INSTALL_PREFIX}/sc_uvm_env_setup.cmake
-    @ONLY
-    )
 install(
-    FILES "${PROJECT_SOURCE_DIR}/cmake/safe_get_target_property.cmake"
+    FILES 
+    "${PROJECT_SOURCE_DIR}/cmake/safe_get_target_property.cmake"
+    "${PROJECT_SOURCE_DIR}/cmake/flatten_rtl_lib.cmake"
+    "${PROJECT_SOURCE_DIR}/cmake/CMakeGraphVizOptions.cmake"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
   )
 install(
-    FILES "${PROJECT_SOURCE_DIR}/cmake/flatten_rtl_lib.cmake"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
+    FILES "${PROJECT_SOURCE_DIR}/scripts/graphviz_shorten_path.py"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/scripts"
   )
 install(
-    FILES "${PROJECT_SOURCE_DIR}/cmake/verilator/verilator.cmake"
+    FILES 
+    "${PROJECT_SOURCE_DIR}/cmake/verilator/verilator.cmake" 
+    "${PROJECT_SOURCE_DIR}/cmake/verilator/find_libs.cmake"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake/verilator"
   )
 install(
@@ -142,11 +147,30 @@ install(
     DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake/verilator"
     RENAME CMakeLists.txt
   )
-install(
-    FILES "${PROJECT_SOURCE_DIR}/cmake/CMakeGraphVizOptions.cmake"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
-  )
-install(
-    FILES "${PROJECT_SOURCE_DIR}/scripts/graphviz_shorten_path.py"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/scripts"
-  )
+
+write_basic_package_version_file(
+    "${PROJECT_NAME}ConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY AnyNewerVersion
+    )
+configure_file(
+    ${PROJECT_SOURCE_DIR}/veriSCConfig.cmake.in
+    ${PROJECT_BINARY_DIR}/veriSCConfig.cmake
+    @ONLY
+    )
+install(FILES 
+    "${PROJECT_BINARY_DIR}/veriSCConfig.cmake" 
+    "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+    DESTINATION lib/cmake/${PROJECT_NAME}
+    )
+
+install(FILES 
+    "${PROJECT_SOURCE_DIR}/verisc_config.cmake" 
+    DESTINATION ${CMAKE_INSTALL_PREFIX}
+    )
+if(DEFINED VERISC_CFG)
+    install(FILES 
+        ${VERISC_CFG}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/user_config.cmake
+        )
+endif()

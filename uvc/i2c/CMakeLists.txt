@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(i2c_lib VERSION 1.0)
+project(i2c VERSION 1.0)
 
 set(CMAKE_CXX_FLAGS "-fPIC -O3 -DNDEBUG")
 
@@ -20,9 +20,12 @@ target_sources(${PROJECT_NAME}
                 )
 
 target_include_directories(${PROJECT_NAME} 
-                PUBLIC "${PROJECT_SOURCE_DIR}/inc"
-                PUBLIC "${PROJECT_SOURCE_DIR}/../common/inc"
-                PUBLIC ${LIB_INCLUDES}
+    PRIVATE "${PROJECT_SOURCE_DIR}/inc"
+    PRIVATE "${PROJECT_SOURCE_DIR}/../common/inc"
+    )
+
+target_link_libraries(${PROJECT_NAME} 
+                PRIVATE ${LIBS}
                 )
 
 install (FILES i2c.h

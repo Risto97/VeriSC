@@ -1,4 +1,4 @@
-include("$ENV{SC_UVM_ENV_HOME}/cmake/flatten_rtl_lib.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/../flatten_rtl_lib.cmake")
 
 function(verilate_rtl OUT_LIB RTL_LIB)
     get_interface_sources(V_SOURCES ${RTL_LIB})
@@ -7,18 +7,13 @@ function(verilate_rtl OUT_LIB RTL_LIB)
     safe_get_target_property(VERILOG_DEFS ${RTL_LIB} VERILOG_DEFS "")
     safe_get_target_property(INCLUDE_DIRS ${RTL_LIB} INTERFACE_INCLUDE_DIRECTORIES "")
 
-    find_file(libs_conf_cmake "libs_conf.cmake"
-        PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH
-        NO_CACHE
-        )
-    set(TAG "OPEN")
-    include(${libs_conf_cmake})
-    find_library(systemc_lib systemc
-        PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH
-        NO_CACHE
-        )
-
-    set(VERILATOR_ROOT ${VERILATOR_HOME_${TAG}})
+    include("$ENV{VERISC_HOME}/verisc_config.cmake")
+    if(EXISTS "$ENV{VERISC_HOME}/user_config.cmake")
+        include("$ENV{VERISC_HOME}/user_config.cmake")
+    endif()
+    if(NOT DEFINED VERILATOR_HOME)
+        set(VERILATOR_HOME $ENV{VERISC_HOME}/open/verilator-${VERILATOR_VERSION})
+    endif()
 
     list(REVERSE V_SOURCES)
     list(GET V_SOURCES 0 TOP_V_FILE)
@@ -35,7 +30,7 @@ function(verilate_rtl OUT_LIB RTL_LIB)
     set(EXT_PRJ ${TOP_MODULE}_vlt)
     ExternalProject_Add(${EXT_PRJ}
         DOWNLOAD_COMMAND ""
-        SOURCE_DIR "$ENV{SC_UVM_ENV_HOME}/cmake/verilator"
+        SOURCE_DIR "$ENV{VERISC_HOME}/cmake/verilator"
         PREFIX ${PROJECT_BINARY_DIR}/${EXT_PRJ}
         BINARY_DIR ${PROJECT_BINARY_DIR}/${EXT_PRJ}
         LIST_SEPARATOR |
@@ -49,13 +44,11 @@ function(verilate_rtl OUT_LIB RTL_LIB)
             -DV_SOURCES=${V_SOURCES}
             -DVLT_CFG_FILES=${VLT_CFG_FILES}
             -DTOP_MODULE=${TOP_MODULE}
-            -DVERILATOR_ARGS=${VERILATOR_ARGS}
+            -DVLT_ARGS=${VERILATOR_ARGS}
             -DVERILOG_DEFS=${VERILOG_DEFS}
             -DINCLUDE_DIRS=${INCLUDE_DIRS}
 
-            -DVERILATOR_ROOT=${VERILATOR_ROOT}
-            -DSYSTEMC_HOME=${SYSTEMC_HOME_${TAG}}
-            -DSYSTEMC_LIB=${systemc_lib}
+            -DVERILATOR_ROOT=${VERILATOR_HOME}
 
         INSTALL_COMMAND ""
         DEPENDS ${RTL_LIB}
@@ -64,88 +57,47 @@ function(verilate_rtl OUT_LIB RTL_LIB)
 
     set(LIB_A "${PROJECT_BINARY_DIR}/${EXT_PRJ}/lib${TOP_MODULE}.a")
     set(INC_DIR "${PROJECT_BINARY_DIR}/${EXT_PRJ}/${EXT_PRJ}")
-    
+
     add_library(tmp_${TOP_MODULE} STATIC IMPORTED)
     add_dependencies(tmp_${TOP_MODULE} ${EXT_PRJ})
     set_target_properties(tmp_${TOP_MODULE} PROPERTIES IMPORTED_LOCATION ${LIB_A})
 
     target_include_directories(${OUT_LIB} INTERFACE ${INC_DIR})
     target_include_directories(${OUT_LIB} INTERFACE
-        "${VERILATOR_ROOT}/include"
-        "${VERILATOR_ROOT}/include/vltstd")
+        "${VERILATOR_HOME}/include"
+        "${VERILATOR_HOME}/include/vltstd")
 
     target_link_libraries(${OUT_LIB} INTERFACE tmp_${TOP_MODULE})
 
 endfunction()
 
-function(verilate_tb SC_LIB RTL_LIBS)
+function(verilate_tb EXEC)
+    set(multiValueArgs RTL_LIBS DEPS)
+    set(options "")
+    set(oneValueArgs "")
+    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    find_file(libs_conf_cmake "libs_conf.cmake"
-        PATHS "$ENV{SC_UVM_ENV_HOME}/open" NO_DEFAULT_PATH
-        NO_CACHE
-        )
-    include(${libs_conf_cmake})
+    include("$ENV{VERISC_HOME}/cmake/verilator/find_libs.cmake")
+    find_libs(libs)
+    if(NOT ${ARG_DEPS} STREQUAL "")
+        set(libs ${ARG_DEPS})
+    endif()
 
-    set(TAG OPEN)
-    find_library(uvc_lib uvc
-        PATHS "${UVC_HOME_${TAG}}/*"
-        NO_DEFAULT_PATH
-        NO_CACHE
-        )
-    find_library(systemc_lib_sci systemc
-        PATHS "${SYSTEMC_HOME_${TAG}}/*" NO_DEFAULT_PATH
-        NO_CACHE
-        )
-    find_library(sc_uvm_lib uvm-systemc
-        PATHS "${SYSTEMC_UVM_HOME_${TAG}}/*" NO_DEFAULT_PATH
-        NO_CACHE
-        )
-    find_library(scv_lib scv
-        PATHS "${SCV_HOME_${TAG}}/*" NO_DEFAULT_PATH
-        NO_CACHE
-        )
-
-    list(APPEND EXTRA_LIBS 
-                ${systemc_lib_sci}
-                ${sc_uvm_lib}
-                ${scv_lib}
-                ${uvc_lib}
-                )
-
-    list(APPEND EXTRA_INCLUDES 
-        "${SYSTEMC_HOME_${TAG}}/include"
-        "${SYSTEMC_UVM_HOME_${TAG}}/include"
-        "${SCV_HOME_${TAG}}/include"
-        "${FC4SC_HOME_${TAG}}/includes"
-        "${SCT_HOME_${TAG}}/components/common/sctcommon/"
-
-        "${UVC_HOME_${TAG}}/include" 
-        )
-
-    add_executable(verilator_tb EXCLUDE_FROM_ALL
-        )
-
-    target_compile_options(verilator_tb PRIVATE
+    target_compile_options(${EXEC} PRIVATE
                         -DVERILATOR=1
                         )
-    target_link_options(verilator_tb PRIVATE -pthread)
 
-    target_include_directories(verilator_tb PRIVATE
-                               ${EXTRA_INCLUDES}
-                               )
+    target_link_libraries(${EXEC} PRIVATE
+        ${ARG_RTL_LIBS} 
+        ${libs}
+        )
 
-
-    target_link_libraries(verilator_tb PRIVATE
-                          ${RTL_LIBS} 
-                          ${EXTRA_LIBS}
-                          ${SC_LIB}
-                        )
-    if(DEFINED LIBSTDCPP_DIR)    # IF non system GCC is used set RPATH for libstdc++
-       set_target_properties(verilator_tb PROPERTIES
-          BUILD_WITH_INSTALL_RPATH TRUE
-          INSTALL_RPATH_USE_LINK_PATH TRUE
-          INSTALL_RPATH "${LIBSTDCPP_DIR}:${INSTALL_RPATH}")
-    endif()
+    if(DEFINED CXX_LIBDIR)    # IF non system GCC is used set RPATH for libstdc++
+        set_target_properties(${EXEC} PROPERTIES
+            BUILD_WITH_INSTALL_RPATH TRUE
+            INSTALL_RPATH_USE_LINK_PATH TRUE
+            INSTALL_RPATH "${CXX_LIBDIR}:${INSTALL_RPATH}")
+        endif()
 
     get_target_property(RUN_ARGS ${PROJECT_NAME} RUN_ARGS)
     if(RUN_ARGS STREQUAL "RUN_ARGS-NOTFOUND")
@@ -153,7 +105,7 @@ function(verilate_tb SC_LIB RTL_LIBS)
     endif()
 
     add_custom_target(run
-        ${COMMAND} ./verilator_tb ${RUN_ARGS}
-        DEPENDS verilator_tb)
+        ${COMMAND} ./${EXEC} ${RUN_ARGS}
+        DEPENDS ${EXEC})
                
 endfunction()

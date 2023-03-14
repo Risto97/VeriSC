@@ -1,4 +1,4 @@
-include("$ENV{SC_UVM_ENV_HOME}/cmake/safe_get_target_property.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/safe_get_target_property.cmake")
 
 function(flat_rtl_lib TARGET OUTLIB)
     flatten_graph(${TARGET})

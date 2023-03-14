@@ -1,6 +1,7 @@
-find_file(setup_fn "sc_uvm_env_setup.cmake"
-    PATHS "$ENV{SC_UVM_ENV_HOME}" NO_DEFAULT_PATH)
-include(${setup_fn})
+find_package(veriSC CONFIG REQUIRED
+    PATHS $ENV{VERISC_HOME}
+    NO_DEFAULT_PATH
+    )
 
 cmake_minimum_required(VERSION ${CMAKE_MIN_VERSION})
 project(simple_sc_verilog VERSION 1.0)
@@ -8,23 +9,21 @@ project(simple_sc_verilog VERSION 1.0)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-add_library(${PROJECT_NAME} INTERFACE)
-
-target_sources(${PROJECT_NAME} INTERFACE
+add_executable(${PROJECT_NAME}
     "${PROJECT_SOURCE_DIR}/sc_main.cpp"
     )
 
-target_include_directories(${PROJECT_NAME} INTERFACE
+target_include_directories(${PROJECT_NAME} PRIVATE
     ${PROJECT_SOURCE_DIR}
     )
 
-target_compile_options(${PROJECT_NAME} INTERFACE
+target_compile_options(${PROJECT_NAME} PRIVATE
     -O3
     -DNDEBUG
     )
 
 if(VERBOSE)
-    target_compile_options(${PROJECT_NAME} INTERFACE -DVERBOSE)
+    target_compile_options(${PROJECT_NAME} PRIVATE -DVERBOSE)
 endif()
 
 
@@ -32,4 +31,7 @@ add_subdirectory(rtl "adder_rtl")
 
 make_rtl(adder_lib adder_rtl)
 
-make_tb(${PROJECT_NAME} "adder_lib")
+make_tb(${PROJECT_NAME} 
+    RTL_LIBS adder_lib
+    DEPS SystemC::systemc
+    )

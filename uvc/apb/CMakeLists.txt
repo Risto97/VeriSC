@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(apb_lib VERSION 1.0)
+project(apb VERSION 1.0)
 
 set(CMAKE_CXX_FLAGS "-fPIC -O3 -DNDEBUG")
 
@@ -16,10 +16,13 @@ target_sources(${PROJECT_NAME}
                 PRIVATE "src/apb_rw.cpp"
                 )
 
-target_include_directories(${PROJECT_NAME} 
-                PUBLIC "${PROJECT_SOURCE_DIR}/inc"
-                PUBLIC ${LIB_INCLUDES}
-                )
+target_include_directories(${PROJECT_NAME}  PRIVATE
+   "${CMAKE_CURRENT_SOURCE_DIR}/inc"
+    )
+
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE ${LIBS}
+    )
 
 install (FILES apb.h
          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
@@ -33,7 +36,3 @@ install (DIRECTORY ${PROJECT_SOURCE_DIR}/inc/
          COMPONENT dev
          FILES_MATCHING PATTERN "*.hpp")
 
-#
-# target_link_libraries(${PROJECT_NAME} 
-#                 PRIVATE ${LIBS}
-#                 )

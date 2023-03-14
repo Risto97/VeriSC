@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(nmi_lib VERSION 1.0)
+project(nmi VERSION 1.0)
 
 set(CMAKE_CXX_FLAGS "-fPIC -O3 -DNDEBUG")
 
@@ -18,10 +18,12 @@ target_sources(${PROJECT_NAME}
                 PRIVATE "src/nmi_rw.cpp"
                 )
 
-# Add SCV directory with libscv.so to path
 target_include_directories(${PROJECT_NAME} 
-                PUBLIC "${PROJECT_SOURCE_DIR}/inc"
-                PUBLIC ${LIB_INCLUDES}
+    PRIVATE "${PROJECT_SOURCE_DIR}/inc"
+    )
+
+target_link_libraries(${PROJECT_NAME} 
+                PRIVATE ${LIBS}
                 )
 
 install (FILES nmi.h

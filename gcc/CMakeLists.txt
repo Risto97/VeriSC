@@ -7,40 +7,25 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
 		cmake_policy(SET CMP0135 NEW)
 endif()
 
-set(CMAKE_SYSTEM_MIC_CLUSTER "Linux-3.10.0-1160.80.1.el7.x86_64")
-message("-- CMAKE_SYSTEM:           ${CMAKE_SYSTEM}")
+set(COMPILE_GCC FALSE)
 
-string (REGEX MATCH "\\.el[1-9]" os_version_suffix ${CMAKE_SYSTEM})
-message("-- os_version_suffix:      ${os_version_suffix}")
+list(FIND CMAKE_CXX_COMPILE_FEATURES "cxx_std_${CMAKE_CXX_STANDARD}" COMPILER_SUPPORTS_STD) # Check if std_17 is supported
+
+if(COMPILER_SUPPORTS_STD EQUAL -1)
+    set(COMPILE_GCC TRUE)
+endif()
 
 
-set(GCC_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/gcc-${GCC_VERSION})
-set(GCC_SRC_DIR ${PROJECT_BINARY_DIR}/src/gcc)
-set(CXX_COMPILER ${GCC_INSTALL_DIR}/bin/g++)
-set(C_COMPILER ${GCC_INSTALL_DIR}/bin/gcc)
-if(DOWNLOAD_GCC_BINARY AND NOT COMPILE_GCC) # Download binaries instead of compile
-    message(STATUS "Downloading GCC binary: ${GCC_VERSION}")
-
-    set(GCC_URL https://cernbox.cern.ch/remote.php/dav/public-files/jHtARNduUdYaQdM/gcc-12.2.0_centos7.tar.gz)
-    ExternalProject_Add(gcc
-                        URL ${GCC_URL}
-                        PREFIX ${PROJECT_BINARY_DIR}
-                        SOURCE_DIR ${GCC_SRC_DIR}
-                        INSTALL_DIR ${GCC_INSTALL_DIR}
-                        CONFIGURE_COMMAND ""
-                        BUILD_COMMAND ""
-                        INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory ${GCC_SRC_DIR} ${GCC_INSTALL_DIR}
-                        )
-
-elseif(NOT DOWNLOAD_GCC_BINARY AND COMPILE_GCC) # Compile GCC
-    message(STATUS "Compiling GCC: ${GCC_VERSION}")
-
+if(COMPILE_GCC)
+    set(GCC_VERSION ${GCC_VERSION})
+    set(GCC_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/gcc-${GCC_VERSION})
+    set(GCC_SRC_DIR ${PROJECT_BINARY_DIR}/src/gcc)
     set(GCC_URL https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz)
 
     list(APPEND GCC_CFG_ARGS 
-        "--build=x86_64-linux-gnu"
-        "--host=x86_64-linux-gnu"
-        "--target=x86_64-linux-gnu"
+        "--build=${CMAKE_SYSTEM_PROCESSOR}-linux-gnu" # TODO check if this works for ARM and RISCV ????
+        "--host=${CMAKE_SYSTEM_PROCESSOR}-linux-gnu"
+        "--target=${CMAKE_SYSTEM_PROCESSOR}-linux-gnu"
         "--enable-checking=release"
         "--enable-languages=c,c++"
         "--enable-shared"
@@ -51,37 +36,51 @@ elseif(NOT DOWNLOAD_GCC_BINARY AND COMPILE_GCC) # Compile GCC
         )
 
     ExternalProject_Add(gcc
-                        URL ${GCC_URL}
-                        PREFIX ${PROJECT_BINARY_DIR}
-                        SOURCE_DIR ${GCC_SRC_DIR}
-                        INSTALL_DIR ${GCC_INSTALL_DIR}
-                        CONFIGURE_COMMAND ${GCC_SRC_DIR}/configure --prefix=${GCC_INSTALL_DIR} ${GCC_CFG_ARGS}
-                        )
+        URL ${GCC_URL}
+        PREFIX ${PROJECT_BINARY_DIR}
+        SOURCE_DIR ${GCC_SRC_DIR}
+        INSTALL_DIR ${GCC_INSTALL_DIR}
+        CONFIGURE_COMMAND ${GCC_SRC_DIR}/configure --prefix=${GCC_INSTALL_DIR} ${GCC_CFG_ARGS}
+        )
 
     ExternalProject_Add_Step(gcc build_deps
-                            COMMAND  cd ${GCC_SRC_DIR} && ${GCC_SRC_DIR}/contrib/download_prerequisites && cd -
-                            COMMENT "Building prerequisites for GCC compilation"
-                            DEPENDEES download patch update
-                            DEPENDERS configure build install
-                            )
-
-elseif(NOT DOWNLOAD_GCC_BINARY AND NOT COMPILE_GCC) # GCC on system is compatible
-    message(STATUS "Using system GCC: ${CMAKE_CXX_COMPILER}")
-    set(CXX_COMPILER ${CMAKE_CXX_COMPILER})
-    set(C_COMPILER ${CMAKE_C_COMPILER})
-    add_library(gcc INTERFACE)
-endif()
-
-set(TAG "OPEN")
-if(DOWNLOAD_GCC_BINARY OR COMPILE_GCC)
-    set(SET_STDLIBCPP_DIR 1)
-else()
-    set(SET_STDLIBCPP_DIR 0)
-endif()
-
-configure_file(${PROJECT_SOURCE_DIR}/gcc_conf.cmake.in ${PROJECT_BINARY_DIR}/gcc_conf_${TAG}.cmake)
-
-install(FILES ${PROJECT_BINARY_DIR}/gcc_conf_${TAG}.cmake
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/open
-        RENAME gcc_conf.cmake
+        COMMAND  cd ${GCC_SRC_DIR} && ${GCC_SRC_DIR}/contrib/download_prerequisites && cd -
+        COMMENT "Building prerequisites for GCC compilation"
+        DEPENDEES download patch update
+        DEPENDERS configure build install
         )
+
+    set(CMAKE_CXX_COMPILER_PATH ${GCC_INSTALL_DIR}/bin/g++)
+    set(CMAKE_C_COMPILER_PATH ${GCC_INSTALL_DIR}/bin/gcc)
+    set(CMAKE_AR_PATH ${GCC_INSTALL_DIR}/bin/gcc-ar)
+    set(CMAKE_RANLIB_PATH ${GCC_INSTALL_DIR}/bin/gcc-ar)
+    set(EXTERNAL_GCC 1)
+
+else()
+    set(GCC_VERSION ${CMAKE_CXX_COMPILER_VERSION})
+    set(GCC_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/gcc-${GCC_VERSION})
+    add_library(gcc INTERFACE)
+
+    set(CMAKE_CXX_COMPILER_PATH ${CMAKE_CXX_COMPILER})
+    set(CMAKE_C_COMPILER_PATH ${CMAKE_C_COMPILER})
+    set(EXTERNAL_GCC 0)
+endif()
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    "gccConfigVersion.cmake"
+    VERSION ${GCC_VERSION}
+    COMPATIBILITY AnyNewerVersion
+    )
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/gccConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/gccConfig.cmake
+    @ONLY
+    )
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/gccConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/gccConfigVersion.cmake"
+    DESTINATION ${GCC_INSTALL_DIR}/lib/cmake/gcc
+    )
+

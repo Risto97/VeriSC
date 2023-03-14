@@ -30,9 +30,9 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/Risto97/VeriSC">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+  <!-- <a href="https://github.com/Risto97/VeriSC"> -->
+  <!--   <img src="images/logo.png" alt="Logo" width="80" height="80"> -->
+  <!-- </a> -->
 
   <h3 align="center">VeriSC</h3>
 
@@ -150,9 +150,9 @@ In order to install VeriSC you need to follow these steps:
     ```sh
     make -j16 install
     ```
-5. It is required to set the enviroment variable to point to the installation directory of VeriSC, TODO change SC_UVM_ENV_HOME -> VERISC_HOME
+5. It is required to set the enviroment variable to point to the installation directory of VeriSC, TODO change VERISC_HOME -> VERISC_HOME
     ```sh
-    export SC_UVM_ENV_HOME=/tools/verisc
+    export VERISC_HOME=/tools/verisc
     ```
 
 Now the VeriSC is installed with all of the libraries and tools

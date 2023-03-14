@@ -1,0 +1,64 @@
+include(CMakeFindDependencyMacro)
+
+set(CMAKE_MIN_VERSION 3.25)
+set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
+set(USE_VCS @USE_VCS@)
+
+# Include GCC toolchain file first
+find_package(gcc CONFIG REQUIRED
+    PATHS $ENV{VERISC_HOME}/*
+    NO_DEFAULT_PATH
+    )
+
+include("$ENV{VERISC_HOME}/cmake/verilator/find_libs.cmake")
+if(NOT DEFINED USE_VERILATOR)
+    set(USE_VERILATOR 1)
+endif()
+
+if(USE_VERILATOR)
+    include("$ENV{VERISC_HOME}/cmake/verilator/verilator.cmake")
+endif()
+
+if(USE_VCS)
+    include("$ENV{VERISC_HOME}/cmake/synopsys/vcs.cmake")
+endif()
+
+include("$ENV{VERISC_HOME}/cmake/flatten_rtl_lib.cmake")
+
+function(make_rtl OUT_LIB RTL_LIB)
+    # Recursively append all includes, sources, defines, cfg_files...
+    flat_rtl_lib(${RTL_LIB} ${OUT_LIB})
+
+    if(USE_VERILATOR)
+        verilate_rtl(${OUT_LIB} ${OUT_LIB})
+        add_dependencies(${OUT_LIB} ${RTL_LIB})
+    endif()
+    if(USE_VCS)
+        vcs_rtl(${OUT_LIB} ${RTL_LIB})
+    endif()
+endfunction()
+
+function(make_tb EXEC)
+    set(multiValueArgs RTL_LIBS)
+    set(options "")
+    set(oneValueArgs "")
+    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(USE_VERILATOR)
+        verilate_tb(${EXEC} RTL_LIBS ${ARG_RTL_LIBS} DEPS ${ARG_DEPS})
+    endif()
+    if(USE_VCS)
+        vcs_tb(${SC_LIB} "${RTL_LIBS}")
+    endif()
+endfunction()
+
+
+if(NOT TARGET graphviz)
+    add_custom_target(graphviz
+        COMMAND ${CMAKE_COMMAND} -E copy $ENV{VERISC_HOME}/cmake/CMakeGraphVizOptions.cmake ${CMAKE_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} "--graphviz=graphviz/foo.dot" .
+        COMMAND python3 $ENV{VERISC_HOME}/scripts/graphviz_shorten_path.py -f "${CMAKE_BINARY_DIR}/graphviz/foo.dot" -o "${CMAKE_BINARY_DIR}/graphviz/out.dot" -l
+        COMMAND dot -Tpng "${CMAKE_BINARY_DIR}/graphviz/out.dot" -o graph.png
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
+endif()

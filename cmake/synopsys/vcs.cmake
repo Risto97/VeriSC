@@ -1,4 +1,4 @@
-include("$ENV{SC_UVM_ENV_HOME}/cmake/flatten_rtl_lib.cmake")
+include("$ENV{VERISC_HOME}/cmake/flatten_rtl_lib.cmake")
 
 function(vcs_rtl OUT_LIB RTL_LIB)
     get_interface_sources(V_SOURCES ${RTL_LIB})
@@ -26,7 +26,7 @@ function(vcs_rtl OUT_LIB RTL_LIB)
     endif()
 
     find_file(libs_conf_cmake "libs_conf.cmake"
-        PATHS "$ENV{SC_UVM_ENV_HOME}/vcs" NO_DEFAULT_PATH
+        PATHS "$ENV{VERISC_HOME}/vcs" NO_DEFAULT_PATH
         NO_CACHE
         )
     include(${libs_conf_cmake})
@@ -34,7 +34,7 @@ function(vcs_rtl OUT_LIB RTL_LIB)
     set(COSIM_DFLT_MAP_FILE ${CMAKE_CURRENT_BINARY_DIR}/cosim_defaults.map) # TODO make configurable per RTL_LIB
     add_custom_target(vlogan_copy_default_portmap_${RTL_LIB}
         COMMAND ${CMAKE_COMMAND} -E copy
-            $ENV{SC_UVM_ENV_HOME}/cmake/synopsys/cosim_defaults.map
+            $ENV{VERISC_HOME}/cmake/synopsys/cosim_defaults.map
             ${COSIM_DFLT_MAP_FILE}
         )
 
@@ -84,7 +84,7 @@ endfunction()
 
 function(vcs_tb SC_LIB RTL_LIBS)
     find_file(libs_conf_cmake "libs_conf.cmake"
-        PATHS "$ENV{SC_UVM_ENV_HOME}/vcs" NO_DEFAULT_PATH
+        PATHS "$ENV{VERISC_HOME}/vcs" NO_DEFAULT_PATH
         NO_CACHE
         )
     include(${libs_conf_cmake})
