@@ -44,7 +44,9 @@ if(NOT FC4SC_VERSION STREQUAL "FALSE")
     add_subdirectory(fc4sc)
 endif()
 
-add_subdirectory(verilator)
+if(NOT VERILATOR_VERSION STREQUAL "FALSE")
+    add_subdirectory(verilator)
+endif()
 
 
 
