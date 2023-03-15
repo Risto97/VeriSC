@@ -1,7 +1,9 @@
+set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../")
 function(find_libs libs)
-    include("$ENV{VERISC_HOME}/verisc_config.cmake")
-    if(EXISTS "$ENV{VERISC_HOME}/user_config.cmake")
-        include("$ENV{VERISC_HOME}/user_config.cmake")
+
+    include("${__VERISC_REL_ROOT}/verisc_config.cmake")
+    if(EXISTS "${__VERISC_REL_ROOT}/user_config.cmake")
+        include("${__VERISC_REL_ROOT}/user_config.cmake")
     endif()
 
 
@@ -12,7 +14,7 @@ function(find_libs libs)
             )
     else()
         find_package(SystemCLanguage CONFIG REQUIRED
-            PATHS $ENV{VERISC_HOME}/open/*
+            PATHS ${__VERISC_REL_ROOT}/open/*
             NO_DEFAULT_PATH
             )
     endif()
@@ -20,19 +22,31 @@ function(find_libs libs)
         list(APPEND libs_found SystemC::systemc)
     endif()
 
-    find_package(fc4sc CONFIG
-        PATHS $ENV{VERISC_HOME}/open/*
-        NO_DEFAULT_PATH
-        )
-    if(fc4sc_FOUND)
-        list(APPEND libs_found fc4sc::fc4sc)
+    if(NOT FC4SC_VERSION STREQUAL "FALSE")
+        find_package(fc4sc CONFIG
+            PATHS ${__VERISC_REL_ROOT}/open/*
+            NO_DEFAULT_PATH
+            )
+        if(fc4sc_FOUND)
+            list(APPEND libs_found fc4sc::fc4sc)
+        endif()
     endif()
 
-    set(libs_to_find uvm-systemc scv uvc)
+    if(NOT UVM-SYSTEMC_VERSION STREQUAL "FALSE")
+        list(APPEND libs_to_find uvm-systemc)
+    endif()
+
+    if(NOT SCV_VERSION STREQUAL "FALSE")
+        list(APPEND libs_to_find scv)
+    endif()
+
+    if(NOT UVC_VERSION STREQUAL "FALSE")
+        list(APPEND libs_to_find uvc)
+    endif()
 
     foreach(l ${libs_to_find})
         find_package(${l} CONFIG
-            PATHS $ENV{VERISC_HOME}/open/*
+            PATHS ${__VERISC_REL_ROOT}/open/*
             NO_DEFAULT_PATH
             )
         if(${${l}_FOUND})

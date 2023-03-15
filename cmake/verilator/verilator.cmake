@@ -1,4 +1,5 @@
 include("${CMAKE_CURRENT_LIST_DIR}/../flatten_rtl_lib.cmake")
+set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../")
 
 function(verilate_rtl OUT_LIB RTL_LIB)
     get_interface_sources(V_SOURCES ${RTL_LIB})
@@ -7,12 +8,12 @@ function(verilate_rtl OUT_LIB RTL_LIB)
     safe_get_target_property(VERILOG_DEFS ${RTL_LIB} VERILOG_DEFS "")
     safe_get_target_property(INCLUDE_DIRS ${RTL_LIB} INTERFACE_INCLUDE_DIRECTORIES "")
 
-    include("$ENV{VERISC_HOME}/verisc_config.cmake")
-    if(EXISTS "$ENV{VERISC_HOME}/user_config.cmake")
-        include("$ENV{VERISC_HOME}/user_config.cmake")
+    include("${__VERISC_REL_ROOT}/verisc_config.cmake")
+    if(EXISTS "${__VERISC_REL_ROOT}/user_config.cmake")
+        include("${__VERISC_REL_ROOT}/user_config.cmake")
     endif()
     if(NOT DEFINED VERILATOR_HOME)
-        set(VERILATOR_HOME $ENV{VERISC_HOME}/open/verilator-${VERILATOR_VERSION})
+        set(VERILATOR_HOME ${__VERISC_REL_ROOT}/open/verilator-${VERILATOR_VERSION})
     endif()
 
     list(REVERSE V_SOURCES)
@@ -30,7 +31,7 @@ function(verilate_rtl OUT_LIB RTL_LIB)
     set(EXT_PRJ ${TOP_MODULE}_vlt)
     ExternalProject_Add(${EXT_PRJ}
         DOWNLOAD_COMMAND ""
-        SOURCE_DIR "$ENV{VERISC_HOME}/cmake/verilator"
+        SOURCE_DIR "${__VERISC_REL_ROOT}/cmake/verilator"
         PREFIX ${PROJECT_BINARY_DIR}/${EXT_PRJ}
         BINARY_DIR ${PROJECT_BINARY_DIR}/${EXT_PRJ}
         LIST_SEPARATOR |
@@ -77,7 +78,7 @@ function(verilate_tb EXEC)
     set(oneValueArgs "")
     cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    include("$ENV{VERISC_HOME}/cmake/verilator/find_libs.cmake")
+    include("${__VERISC_REL_ROOT}/cmake/verilator/find_libs.cmake")
     find_libs(libs)
     if(NOT ${ARG_DEPS} STREQUAL "")
         set(libs ${ARG_DEPS})
