@@ -1,11 +1,13 @@
-cmake_minimum_required(VERSION 3.12)
+set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../")
+
+cmake_minimum_required(VERSION 3.25)
 project(verilate_ext_prj)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 find_package(SystemCLanguage CONFIG REQUIRED
-    PATHS $ENV{VERISC_HOME}/open/*
+    PATHS ${__VERISC_REL_ROOT}/open/*
     NO_DEFAULT_PATH
     )
 
