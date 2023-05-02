@@ -105,17 +105,17 @@ bool intf::wait_stop_condition() {
 
 void intf::trace(sc_core::sc_trace_file *wf, bool just_tri) {
   std::string name = this->name();
-  sc_trace(wf, sda, name + "_sda");
-  sc_trace(wf, scl, name + "_scl");
+  sc_trace(wf, sda, name + ".sda");
+  sc_trace(wf, scl, name + ".scl");
 
   if (!just_tri) {
-    sc_trace(wf, scl_i, name + "_scl_i");
-    sc_trace(wf, scl_o, name + "_scl_o");
-    sc_trace(wf, scl_t, name + "_scl_t");
+    sc_trace(wf, scl_i, name + ".scl_i");
+    sc_trace(wf, scl_o, name + ".scl_o");
+    sc_trace(wf, scl_t, name + ".scl_t");
 
-    sc_trace(wf, sda_i, name + "_sda_i");
-    sc_trace(wf, sda_o, name + "_sda_o");
-    sc_trace(wf, sda_t, name + "_sda_t");
+    sc_trace(wf, sda_i, name + ".sda_i");
+    sc_trace(wf, sda_o, name + ".sda_o");
+    sc_trace(wf, sda_t, name + ".sda_t");
   }
 }
 } // namespace uvc::i2c

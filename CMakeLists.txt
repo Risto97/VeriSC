@@ -133,7 +133,7 @@ include(CMakePackageConfigHelpers)
 install(
     FILES 
     "${PROJECT_SOURCE_DIR}/cmake/safe_get_target_property.cmake"
-    "${PROJECT_SOURCE_DIR}/cmake/flatten_rtl_lib.cmake"
+    "${PROJECT_SOURCE_DIR}/cmake/rtllib.cmake"
     "${PROJECT_SOURCE_DIR}/cmake/CMakeGraphVizOptions.cmake"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
   )

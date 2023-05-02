@@ -1,74 +1,174 @@
-include("${CMAKE_CURRENT_LIST_DIR}/../flatten_rtl_lib.cmake")
 set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../")
 
-function(verilate_rtl OUT_LIB RTL_LIB)
-    get_interface_sources(V_SOURCES ${RTL_LIB})
-    safe_get_target_property(VLT_CFG_FILES ${RTL_LIB} VERILATOR_CFG_FILES "")
-    safe_get_target_property(VERILATOR_ARGS ${RTL_LIB} VERILATOR_ARGS "")
-    safe_get_target_property(VERILOG_DEFS ${RTL_LIB} VERILOG_DEFS "")
-    safe_get_target_property(INCLUDE_DIRS ${RTL_LIB} INTERFACE_INCLUDE_DIRECTORIES "")
+include("${__VERISC_REL_ROOT}/verisc_config.cmake")
+if(EXISTS "${__VERISC_REL_ROOT}/user_config.cmake")
+    include("${__VERISC_REL_ROOT}/user_config.cmake")
+endif()
+if(NOT DEFINED VERILATOR_HOME)
+    set(VERILATOR_HOME ${__VERISC_REL_ROOT}/open/verilator-${VERILATOR_VERSION})
+endif()
 
-    include("${__VERISC_REL_ROOT}/verisc_config.cmake")
-    if(EXISTS "${__VERISC_REL_ROOT}/user_config.cmake")
-        include("${__VERISC_REL_ROOT}/user_config.cmake")
+function(verilate_rtl LIB)
+    set(OPTIONS "COVERAGE;TRACE;TRACE_FST;SYSTEMC;TRACE_STRUCTS;EXCLUDE_FROM_ALL")
+    set(ONE_PARAM_ARGS "PREFIX;TOP_MODULE;THREADS;TRACE_THREADS;DIRECTORY")
+    set(MULTI_PARAM_ARGS "VERILATOR_ARGS;OPT_SLOW;OPT_FAST;OPT_GLOBAL")
+
+    cmake_parse_arguments(VERILATE "${OPTIONS}"
+        "${ONE_PARAM_ARGS}"
+        "${MULTI_PARAM_ARGS}"
+        ${ARGN})
+
+    include("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../rtllib.cmake")
+
+    get_target_property(BINARY_DIR ${LIB} BINARY_DIR)
+
+    get_rtl_target_property(INTERFACE_INCLUDE_DIRECTORIES ${LIB} INTERFACE_INCLUDE_DIRECTORIES)
+    get_rtl_target_property(INCLUDE_DIRECTORIES ${LIB} INCLUDE_DIRECTORIES)
+    if(INTERFACE_INCLUDE_DIRECTORIES)
+        set(INCLUDE_DIRS_ARG INCLUDE_DIRS ${INTERFACE_INCLUDE_DIRECTORIES} ${INCLUDE_DIRECTORIES})
     endif()
-    if(NOT DEFINED VERILATOR_HOME)
-        set(VERILATOR_HOME ${__VERISC_REL_ROOT}/open/verilator-${VERILATOR_VERSION})
+
+    get_rtl_target_sources(V_FILES ${LIB} SOURCES)
+
+    if(VERILATE_TOP_MODULE)
+        set(TOP_MODULE_ARG TOP_MODULE ${VERILATE_TOP_MODULE})
+    else()
+        list(GET V_FILES -1 LAST_SOURCE)
+        get_filename_component(TOP_MOD ${LAST_SOURCE} NAME_WE)
+        set(TOP_MODULE_ARG TOP_MODULE ${TOP_MOD})
     endif()
 
-    list(REVERSE V_SOURCES)
-    list(GET V_SOURCES 0 TOP_V_FILE)
-    get_filename_component(V_SOURCE_WO_EXT ${TOP_V_FILE} NAME_WE)
-    set(TOP_MODULE ${V_SOURCE_WO_EXT})
+    if(VERILATE_EXCLUDE_FROM_ALL)
+        set(VERILATE_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
+    else()
+        set(VERILATE_EXCLUDE_FROM_ALL "")
+    endif()
 
-    include(ExternalProject)
+    get_rtl_target_property(LIB_VERILATOR_ARGS ${LIB} VERILATOR_ARGS)
+    set(VERILATOR_ARGS VERILATOR_ARGS ${VERILATE_VERILATOR_ARGS} ${LIB_VERILATOR_ARGS})
 
-    string(REPLACE ";" "|" V_SOURCES "${V_SOURCES}")
-    string(REPLACE ";" "|" INCLUDE_DIRS "${INCLUDE_DIRS}")
-    string(REPLACE ";" "|" VERILOG_DEFS "${VERILOG_DEFS}")
-    string(REPLACE ";" "|" VLT_CFG_FILES "${VLT_CFG_FILES}")
-    string(REPLACE ";" "|" VERILATOR_ARGS "${VERILATOR_ARGS}")
-    set(EXT_PRJ ${TOP_MODULE}_vlt)
-    ExternalProject_Add(${EXT_PRJ}
-        DOWNLOAD_COMMAND ""
-        SOURCE_DIR "${__VERISC_REL_ROOT}/cmake/verilator"
-        PREFIX ${PROJECT_BINARY_DIR}/${EXT_PRJ}
-        BINARY_DIR ${PROJECT_BINARY_DIR}/${EXT_PRJ}
-        LIST_SEPARATOR |
-        BUILD_ALWAYS 1
+    foreach(s ${V_FILES})
+        message("S: ${s}")
+    endforeach()
+    list(REMOVE_DUPLICATES V_FILES)
 
-        CMAKE_ARGS
-            -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
-            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    if(NOT VERILATE_PREFIX)
+        set(VERILATE_PREFIX)
+    endif()
 
-            -DV_SOURCES=${V_SOURCES}
-            -DVLT_CFG_FILES=${VLT_CFG_FILES}
-            -DTOP_MODULE=${TOP_MODULE}
-            -DVLT_ARGS=${VERILATOR_ARGS}
-            -DVERILOG_DEFS=${VERILOG_DEFS}
-            -DINCLUDE_DIRS=${INCLUDE_DIRS}
+    verilate(${LIB} ${VERILATE_EXCLUDE_FROM_ALL}
+        SOURCES ${V_FILES}
+        ${VERILATOR_ARGS}
 
-            -DVERILATOR_ROOT=${VERILATOR_HOME}
+        ${ARGN}
+        ${INCLUDE_DIRS_ARG}
+        ${TOP_MODULE_ARG}
+        )
 
-        INSTALL_COMMAND ""
-        DEPENDS ${RTL_LIB}
-        EXCLUDE_FROM_ALL 1
-        ) 
+    get_target_property(DEPENDS ${LIB} DEPENDS)
+    add_dependencies(${LIB}_vlt ${DEPENDS})
+    add_dependencies(${LIB} ${LIB}_vlt)
 
-    set(LIB_A "${PROJECT_BINARY_DIR}/${EXT_PRJ}/lib${TOP_MODULE}.a")
-    set(INC_DIR "${PROJECT_BINARY_DIR}/${EXT_PRJ}/${EXT_PRJ}")
+endfunction()
 
-    add_library(tmp_${TOP_MODULE} STATIC IMPORTED)
-    add_dependencies(tmp_${TOP_MODULE} ${EXT_PRJ})
-    set_target_properties(tmp_${TOP_MODULE} PROPERTIES IMPORTED_LOCATION ${LIB_A})
+function(verilate TARGET)
+    set(OPTIONS "COVERAGE;TRACE;TRACE_FST;SYSTEMC;TRACE_STRUCTS;EXCLUDE_FROM_ALL")
+    set(ONE_PARAM_ARGS "PREFIX;TOP_MODULE;THREADS;TRACE_THREADS;DIRECTORY")
+    set(MULTI_PARAM_ARGS "SOURCES;VERILATOR_ARGS;INCLUDE_DIRS;OPT_SLOW;OPT_FAST;OPT_GLOBAL")
+    cmake_parse_arguments(VERILATE 
+        "${OPTIONS}"
+        "${ONE_PARAM_ARGS}"
+        "${MULTI_PARAM_ARGS}"
+        ${ARGN})
 
-    target_include_directories(${OUT_LIB} INTERFACE ${INC_DIR})
-    target_include_directories(${OUT_LIB} INTERFACE
+
+    if (NOT VERILATE_SOURCES)
+        message(FATAL_ERROR "Need at least one source")
+    endif()
+
+    if(NOT VERILATE_TOP_MODULE)
+        list(GET VERILATE_SOURCES 0 FIRST_SOURCE)
+        get_filename_component(TOP_MODULE ${FIRST_SOURCE} NAME_WE)
+    else()
+        set(TOP_MODULE ${VERILATE_TOP_MODULE})
+    endif()
+
+    if(VERILATE_EXCLUDE_FROM_ALL)
+        set(VERILATE_EXCLUDE_FROM_ALL "EXCLUDE_FROM_ALL")
+    else()
+        set(VERILATE_EXCLUDE_FROM_ALL "")
+    endif()
+
+    if(NOT VERILATE_DIRECTORY)
+        set(VERILATE_DIRECTORY "${PROJECT_BINARY_DIR}/${TARGET}_vlt/verilate")
+    endif()
+
+    if(VERILATE_PREFIX)
+        set(TOP_MODULE ${VERILATE_PREFIX})
+    else()
+        if(VERILATE_TOP_MODULE)
+            set(VERILATE_PREFIX "V${VERILATE_TOP_MODULE}")
+        endif()
+    endif()
+
+
+    foreach(param ${MULTI_PARAM_ARGS})
+        string(REPLACE ";" "|" VERILATE_${param} "${VERILATE_${param}}")
+    endforeach()
+
+    foreach(param ${OPTIONS} ${ONE_PARAM_ARGS} ${MULTI_PARAM_ARGS})
+        if(VERILATE_${param})
+            list(APPEND EXT_PRJ_ARGS "-DVERILATE_${param}=${VERILATE_${param}}")
+            list(APPEND ARGUMENTS_LIST ${param})
+        endif()
+    endforeach()
+    string(REPLACE ";" "|" ARGUMENTS_LIST "${ARGUMENTS_LIST}")
+
+    if(CMAKE_CXX_STANDARD)
+        set(ARG_CMAKE_CXX_STANDARD "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
+    endif()
+
+      include(ExternalProject)
+      ExternalProject_Add(${TARGET}_vlt
+          DOWNLOAD_COMMAND ""
+          SOURCE_DIR "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/verilator"
+          PREFIX ${PROJECT_BINARY_DIR}/${TARGET}_vlt
+          BINARY_DIR ${PROJECT_BINARY_DIR}/${TARGET}_vlt
+          LIST_SEPARATOR |
+          BUILD_ALWAYS 1
+
+          CMAKE_ARGS
+              ${ARG_CMAKE_CXX_STANDARD}
+              -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+              -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+              -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+
+              -DTARGET=${TARGET}
+              -DARGUMENTS_LIST=${ARGUMENTS_LIST}
+              ${EXT_PRJ_ARGS}
+              -DVERILATOR_ROOT=${VERILATOR_HOME}
+
+          INSTALL_COMMAND ""
+          EXCLUDE_FROM_ALL 1
+          ) 
+
+    set(VLT_STATIC_LIB "${PROJECT_BINARY_DIR}/${TARGET}_vlt/lib${TARGET}.a")
+    set(INC_DIR ${VERILATE_DIRECTORY})
+
+    add_library(tmp_${TARGET} STATIC IMPORTED)
+    set_target_properties(tmp_${TARGET} PROPERTIES IMPORTED_LOCATION ${VLT_STATIC_LIB})
+    
+    target_include_directories(tmp_${TARGET} INTERFACE ${INC_DIR})
+    target_include_directories(tmp_${TARGET} INTERFACE
         "${VERILATOR_HOME}/include"
         "${VERILATOR_HOME}/include/vltstd")
+    
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
 
-    target_link_libraries(${OUT_LIB} INTERFACE tmp_${TOP_MODULE})
+    cmake_policy(SET CMP0079 NEW)
+    target_link_libraries(${TARGET} INTERFACE tmp_${TARGET} -pthread)
+    # add_dependencies(${TARGET} tmp_${TARGET} ${TARGET}_vlt)
 
 endfunction()
 

@@ -1,46 +1,33 @@
-set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../")
-
 cmake_minimum_required(VERSION 3.25)
-project(verilate_ext_prj)
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-find_package(SystemCLanguage CONFIG REQUIRED
-    PATHS ${__VERISC_REL_ROOT}/open/*
-    NO_DEFAULT_PATH
-    )
+project(${TARGET})
 
 find_package(verilator HINTS ${VERILATOR_ROOT})
 if (NOT verilator_FOUND)
   message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
 endif()
 
-foreach(def ${VERILOG_DEFS})
-    list(APPEND VLT_DEFS -D${def})
+foreach(ARG ${ARGUMENTS_LIST})
+    string(REPLACE "VERILATE_" "" ARG_MOD ${ARG})
+    list(APPEND FORWARDED_ARGS ${ARG_MOD} ${VERILATE_${ARG}})
 endforeach()
 
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-string(REPLACE " " ";" VLT_ARGS "${VLT_ARGS}")
-list(APPEND ARGS
-    --pins-sc-uint
-    --trace
-    --trace-structs
-     -Wno-fatal
-     ${VLT_ARGS}
+add_library(${TARGET})
+verilate(${TARGET}
+    ${FORWARDED_ARGS}
     )
 
-add_library(${TOP_MODULE})
-verilate(${TOP_MODULE} SYSTEMC
-    SOURCES ${V_SOURCES} ${VLT_CFG_FILES}
-    TOP_MODULE ${TOP_MODULE}
-    PREFIX ${TOP_MODULE}
-    DIRECTORY ${PROJECT_BINARY_DIR}/${TOP_MODULE}_vlt
-    INCLUDE_DIRS ${INCLUDE_DIRS}
-    VERILATOR_ARGS ${ARGS} ${VLT_DEFS}
+if(VERILATE_SYSTEMC)
+    set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../")
+    set(THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package(Threads REQUIRED)
+
+    find_package(SystemCLanguage CONFIG REQUIRED
+        PATHS ${__VERISC_REL_ROOT}/open/*
+        NO_DEFAULT_PATH
         )
 
-target_link_libraries(${TOP_MODULE} PRIVATE SystemC::systemc)
-target_link_options(${TOP_MODULE} PRIVATE -pthread)
+    target_link_libraries(${TARGET} PUBLIC SystemC::systemc)
+    target_link_options(${TARGET} PUBLIC SystemC::systemc -pthread)
+endif()
+
+

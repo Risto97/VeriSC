@@ -25,19 +25,15 @@ if(USE_VCS)
     include("${__VERISC_REL_ROOT}/cmake/synopsys/vcs.cmake")
 endif()
 
-include("${__VERISC_REL_ROOT}/cmake/flatten_rtl_lib.cmake")
+include("${__VERISC_REL_ROOT}/cmake/rtllib.cmake")
 
-function(make_rtl OUT_LIB RTL_LIB)
-    # Recursively append all includes, sources, defines, cfg_files...
-    flat_rtl_lib(${RTL_LIB} ${OUT_LIB})
-
+function(make_rtl RTL_LIB)
     if(USE_VERILATOR)
-        verilate_rtl(${OUT_LIB} ${OUT_LIB})
-        add_dependencies(${OUT_LIB} ${RTL_LIB})
+        verilate_rtl(${RTL_LIB} SYSTEMC)
     endif()
-    if(USE_VCS)
-        vcs_rtl(${OUT_LIB} ${RTL_LIB})
-    endif()
+    # if(USE_VCS)
+    #     vcs_rtl(${OUT_LIB} ${RTL_LIB})
+    # endif()
 endfunction()
 
 function(make_tb EXEC)
