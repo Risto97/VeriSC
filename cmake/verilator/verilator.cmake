@@ -53,7 +53,7 @@ function(verilate_rtl LIB)
         set(VERILATE_PREFIX)
     endif()
 
-    verilate(${LIB} ${VERILATE_EXCLUDE_FROM_ALL}
+    verilate_verisc(${LIB} ${VERILATE_EXCLUDE_FROM_ALL}
         SOURCES ${V_FILES}
         ${VERILATOR_ARGS}
 
@@ -66,7 +66,7 @@ function(verilate_rtl LIB)
 
 endfunction()
 
-function(verilate TARGET)
+function(verilate_verisc TARGET)
     set(OPTIONS "COVERAGE;TRACE;TRACE_FST;SYSTEMC;TRACE_STRUCTS;EXCLUDE_FROM_ALL")
     set(ONE_PARAM_ARGS "PREFIX;TOP_MODULE;THREADS;TRACE_THREADS;DIRECTORY")
     set(MULTI_PARAM_ARGS "SOURCES;VERILATOR_ARGS;INCLUDE_DIRS;OPT_SLOW;OPT_FAST;OPT_GLOBAL")
