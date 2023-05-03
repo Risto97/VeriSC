@@ -23,8 +23,8 @@ public:
   sc_core::sc_signal<bool> sda_t;
   sc_core::sc_signal<bool> sda_o;
 
-  // uvc::TRISTATE scl_tr;
-  // uvc::TRISTATE sda_tr;
+  uvc::TRISTATE scl_tr;
+  uvc::TRISTATE sda_tr;
 
   // Not a real stop condition because of delta cycles,
   // SDA can be asserted delta time after SCL
