@@ -17,7 +17,7 @@ verilate(${TARGET}
     )
 
 if(VERILATE_SYSTEMC)
-    set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../")
+    set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../")
     set(THREADS_PREFER_PTHREAD_FLAG ON)
     find_package(Threads REQUIRED)
 
