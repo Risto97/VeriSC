@@ -47,9 +47,6 @@ function(verilate_rtl LIB)
     get_rtl_target_property(LIB_VERILATOR_ARGS ${LIB} VERILATOR_ARGS)
     set(VERILATOR_ARGS VERILATOR_ARGS ${VERILATE_VERILATOR_ARGS} ${LIB_VERILATOR_ARGS})
 
-    foreach(s ${V_FILES})
-        message("S: ${s}")
-    endforeach()
     list(REMOVE_DUPLICATES V_FILES)
 
     if(NOT VERILATE_PREFIX)
@@ -65,9 +62,7 @@ function(verilate_rtl LIB)
         ${TOP_MODULE_ARG}
         )
 
-    get_target_property(DEPENDS ${LIB} DEPENDS)
-    add_dependencies(${LIB}_vlt ${DEPENDS})
-    add_dependencies(${LIB} ${LIB}_vlt)
+    add_dependencies(${LIB}_vlt ${LIB})
 
 endfunction()
 
@@ -131,7 +126,7 @@ function(verilate TARGET)
       include(ExternalProject)
       ExternalProject_Add(${TARGET}_vlt
           DOWNLOAD_COMMAND ""
-          SOURCE_DIR "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/verilator"
+          SOURCE_DIR "${CMAKE_CURRENT_FUNCTION_LIST_DIR}"
           PREFIX ${PROJECT_BINARY_DIR}/${TARGET}_vlt
           BINARY_DIR ${PROJECT_BINARY_DIR}/${TARGET}_vlt
           LIST_SEPARATOR |
@@ -149,6 +144,7 @@ function(verilate TARGET)
               -DVERILATOR_ROOT=${VERILATOR_HOME}
 
           INSTALL_COMMAND ""
+          DEPENDS ${TARGET}
           EXCLUDE_FROM_ALL 1
           ) 
 
@@ -167,8 +163,11 @@ function(verilate TARGET)
     find_package(Threads REQUIRED)
 
     cmake_policy(SET CMP0079 NEW)
-    target_link_libraries(${TARGET} INTERFACE tmp_${TARGET} -pthread)
-    # add_dependencies(${TARGET} tmp_${TARGET} ${TARGET}_vlt)
+
+    add_library(${TARGET}_verilated INTERFACE)
+    target_link_libraries(${TARGET}_verilated INTERFACE tmp_${TARGET} -pthread)
+    set_property(TARGET ${TARGET} PROPERTY VLT_LIB ${TARGET}_verilated)
+    add_dependencies(${TARGET}_verilated ${TARGET} ${TARGET}_vlt)
 
 endfunction()
 
@@ -188,8 +187,15 @@ function(verilate_tb EXEC)
                         -DVERILATOR=1
                         )
 
+    if(NOT ARG_RTL_LIBS)
+        message(FATAL_ERROR "No RTL Libs provided")
+    endif()
+    foreach(lib ${ARG_RTL_LIBS})
+        get_target_property(VLT_LIB ${lib} VLT_LIB)
+        list(APPEND VLT_LIBS ${VLT_LIB})
+    endforeach()
     target_link_libraries(${EXEC} PRIVATE
-        ${ARG_RTL_LIBS} 
+        ${VLT_LIBS} 
         ${libs}
         )
 
