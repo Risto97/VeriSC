@@ -24,7 +24,7 @@ if(NOT DEFINED VERILATOR_HOME)
     set(VERILATOR_SRC_DIR ${PROJECT_BINARY_DIR}/src/verilator)
     ExternalProject_Add(verilator
         GIT_REPOSITORY https://github.com/verilator/verilator.git
-        GIT_TAG v${VERILATOR_VERSION}
+        GIT_TAG ${VERILATOR_VERSION}
         PREFIX ${PROJECT_BINARY_DIR}
         PATCH_COMMAND patch -N ${VERILATOR_SRC_DIR}/verilator-config.cmake.in -i ${CMAKE_CURRENT_LIST_DIR}/verilator-config.patch || true
         CONFIGURE_COMMAND  autoconf --output ${VERILATOR_SRC_DIR}/configure ${VERILATOR_SRC_DIR}/configure.ac && ${VERILATOR_SRC_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} --prefix=${VERILATOR_INSTALL_DIR}
