@@ -1,11 +1,7 @@
 set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../")
 function(find_libs libs)
 
-    include("${__VERISC_REL_ROOT}/verisc_config.cmake")
-    if(EXISTS "${__VERISC_REL_ROOT}/user_config.cmake")
-        include("${__VERISC_REL_ROOT}/user_config.cmake")
-    endif()
-
+    include("${__VERISC_REL_ROOT}/deps_cfg.cmake")
 
     if(DEFINED SYSTEMC_HOME) # SystemC is a cmake package, so look for it in the preinstalled directory
         find_package(SystemCLanguage CONFIG REQUIRED

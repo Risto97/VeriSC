@@ -171,6 +171,13 @@ configure_file(
     ${PROJECT_BINARY_DIR}/veriSCConfig.cmake
     @ONLY
     )
+configure_file(
+    ${PROJECT_SOURCE_DIR}/deps_cfg.cmake.in
+    ${PROJECT_BINARY_DIR}/deps_cfg.cmake
+    @ONLY
+    )
+
+
 install(FILES 
     "${PROJECT_BINARY_DIR}/veriSCConfig.cmake" 
     "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
@@ -178,13 +185,6 @@ install(FILES
     )
 
 install(FILES 
-    "${PROJECT_SOURCE_DIR}/verisc_config.cmake" 
+    "${PROJECT_SOURCE_DIR}/deps_cfg.cmake" 
     DESTINATION ${CMAKE_INSTALL_PREFIX}
     )
-if(DEFINED VERISC_CFG)
-    install(FILES 
-        ${VERISC_CFG}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}
-        RENAME user_config.cmake
-        )
-endif()

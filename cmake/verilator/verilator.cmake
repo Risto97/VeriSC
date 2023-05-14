@@ -1,9 +1,7 @@
 set(__VERISC_REL_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../")
 
-include("${__VERISC_REL_ROOT}/verisc_config.cmake")
-if(EXISTS "${__VERISC_REL_ROOT}/user_config.cmake")
-    include("${__VERISC_REL_ROOT}/user_config.cmake")
-endif()
+include("${__VERISC_REL_ROOT}/deps_cfg.cmake")
+
 if(NOT DEFINED VERILATOR_HOME)
     set(VERILATOR_HOME ${__VERISC_REL_ROOT}/open/verilator-${VERILATOR_VERSION})
 endif()
