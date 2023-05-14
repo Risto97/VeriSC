@@ -48,7 +48,16 @@ ExternalProject_Add(tools_install
                 -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}
                 -DVERISC_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}
                 -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+
                 -DVERISC_CFG=${VERISC_CFG}
+
+                -DSYSTEMC_VERSION=${SYSTEMC_VERSION}
+                -DSCV_VERSION=${SCV_VERSION}
+                -DUVM-SYSTEMC_VERSION=${UVM-SYSTEMC_VERSION}
+                -DVERILATOR_VERSION=${VERILATOR_VERSION}
+                -DFC4SC_VERSION=${FC4SC_VERSION}
+                -DICSC_COMPILER_VERSION=${ICSC_COMPILER_VERSION}
+
                 -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
             DEPENDS gcc_install
             )
