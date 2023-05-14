@@ -9,10 +9,10 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR})
 endif()
 
-include(${PROJECT_SOURCE_DIR}/verisc_config.cmake)
 if(DEFINED VERISC_CFG)
     include(${VERISC_CFG})
 endif()
+include(${PROJECT_SOURCE_DIR}/verisc_config.cmake)
 
 include(ExternalProject)
 
