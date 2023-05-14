@@ -1,25 +1,30 @@
 if(NOT DEFINED VERILATOR_HOME)
-    set(PO4A_INSTALL_DIR ${GROUP_INSTALL_DIR}/po4a-${PO4A_VERSION})
-    set(PO4A_SRC_DIR ${PROJECT_BINARY_DIR}/src/po4a)
-    ExternalProject_Add(po4a
-        GIT_REPOSITORY https://github.com/mquinson/po4a.git
-        GIT_TAG v${PO4A_VERSION}
-        PREFIX ${PROJECT_BINARY_DIR}
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory ${PO4A_SRC_DIR} ${PO4A_INSTALL_DIR}
-        )
+    find_program(HELP2MAN help2man)
 
-    set(HELP2MAN_INSTALL_DIR ${GROUP_INSTALL_DIR}/help2man-${HELP2MAN_VERSION})
-    set(HELP2MAN_SRC_DIR ${PROJECT_BINARY_DIR}/src/help2man)
-    ExternalProject_Add(help2man
-        URL https://mirrors.kernel.org/gnu/help2man/help2man-${HELP2MAN_VERSION}.tar.xz
-        PREFIX ${PROJECT_BINARY_DIR}
-        CONFIGURE_COMMAND cd ${HELP2MAN_SRC_DIR} && autoconf --output ${HELP2MAN_SRC_DIR}/configure  ${HELP2MAN_SRC_DIR}/configure.ac && ${HELP2MAN_SRC_DIR}/configure --prefix=${HELP2MAN_INSTALL_DIR} && cd -
-        BUILD_COMMAND ""
-        INSTALL_COMMAND cd ${HELP2MAN_SRC_DIR} && PATH=${PO4A_INSTALL_DIR}:$ENV{PATH} PERLLIB=${PO4A_INSTALL_DIR}/lib:$ENV{PERLLIB} $(MAKE) install && cd -
-        DEPENDS po4a
-        )
+    if(NOT HELP2MAN)
+        set(PO4A_INSTALL_DIR ${GROUP_INSTALL_DIR}/po4a-${PO4A_VERSION})
+        set(PO4A_SRC_DIR ${PROJECT_BINARY_DIR}/src/po4a)
+        ExternalProject_Add(po4a
+            GIT_REPOSITORY https://github.com/mquinson/po4a.git
+            GIT_TAG v${PO4A_VERSION}
+            PREFIX ${PROJECT_BINARY_DIR}
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory ${PO4A_SRC_DIR} ${PO4A_INSTALL_DIR}
+            )
+
+        set(HELP2MAN_INSTALL_DIR ${GROUP_INSTALL_DIR}/help2man-${HELP2MAN_VERSION})
+        set(HELP2MAN_SRC_DIR ${PROJECT_BINARY_DIR}/src/help2man)
+        ExternalProject_Add(help2man
+            URL https://mirrors.kernel.org/gnu/help2man/help2man-${HELP2MAN_VERSION}.tar.xz
+            PREFIX ${PROJECT_BINARY_DIR}
+            CONFIGURE_COMMAND cd ${HELP2MAN_SRC_DIR} && autoconf --output ${HELP2MAN_SRC_DIR}/configure  ${HELP2MAN_SRC_DIR}/configure.ac && ${HELP2MAN_SRC_DIR}/configure --prefix=${HELP2MAN_INSTALL_DIR} && cd -
+            BUILD_COMMAND ""
+            INSTALL_COMMAND cd ${HELP2MAN_SRC_DIR} && PATH=${PO4A_INSTALL_DIR}:$ENV{PATH} PERLLIB=${PO4A_INSTALL_DIR}/lib:$ENV{PERLLIB} $(MAKE) install && cd -
+            DEPENDS po4a
+            )
+        list(VERILATOR_DEPENDS APPEND help2man)
+    endif()
 
     set(VERILATOR_SRC_DIR ${PROJECT_BINARY_DIR}/src/verilator)
     ExternalProject_Add(verilator
@@ -31,7 +36,7 @@ if(NOT DEFINED VERILATOR_HOME)
         BUILD_COMMAND PATH=${HELP2MAN_INSTALL_DIR}/bin:$ENV{PATH} $(MAKE)
 
         INSTALL_COMMAND make install && ${CMAKE_COMMAND} -E copy_directory ${VERILATOR_INSTALL_DIR}/share/verilator/include ${VERILATOR_INSTALL_DIR}/include
-        DEPENDS help2man
+        DEPENDS ${VERILATOR_DEPENDS}
         )
 
 else()
