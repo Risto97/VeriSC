@@ -183,7 +183,7 @@ function(verilate_tb EXEC)
         set(libs ${ARG_DEPS})
     endif()
 
-    target_compile_options(${EXEC} PRIVATE
+    target_compile_options(${EXEC} PUBLIC
                         -DVERILATOR=1
                         )
 
@@ -194,7 +194,7 @@ function(verilate_tb EXEC)
         get_target_property(VLT_LIB ${lib} VLT_LIB)
         list(APPEND VLT_LIBS ${VLT_LIB})
     endforeach()
-    target_link_libraries(${EXEC} PRIVATE
+    target_link_libraries(${EXEC}
         ${VLT_LIBS} 
         ${libs}
         )
