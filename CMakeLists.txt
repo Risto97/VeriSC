@@ -185,6 +185,6 @@ install(FILES
     )
 
 install(FILES 
-    "${PROJECT_SOURCE_DIR}/deps_cfg.cmake" 
+    "${PROJECT_BINARY_DIR}/deps_cfg.cmake" 
     DESTINATION ${CMAKE_INSTALL_PREFIX}
     )
