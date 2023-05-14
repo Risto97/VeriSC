@@ -3,7 +3,6 @@ project(veriSC VERSION 0.0.3)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     message(WARNING "Please define installation directonry by calling cmake with -DCMAKE_INSTALL_PREFIX=<installation-path>
     Using default directory ${PROJECT_BINARY_DIR}")
