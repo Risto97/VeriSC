@@ -23,7 +23,7 @@ if(NOT DEFINED VERILATOR_HOME)
             INSTALL_COMMAND cd ${HELP2MAN_SRC_DIR} && PATH=${PO4A_INSTALL_DIR}:$ENV{PATH} PERLLIB=${PO4A_INSTALL_DIR}/lib:$ENV{PERLLIB} $(MAKE) install && cd -
             DEPENDS po4a
             )
-        list(VERILATOR_DEPENDS APPEND help2man)
+        list(APPEND VERILATOR_DEPENDS help2man)
     endif()
 
     set(VERILATOR_SRC_DIR ${PROJECT_BINARY_DIR}/src/verilator)
