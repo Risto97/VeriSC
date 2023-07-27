@@ -20,7 +20,7 @@ if(NOT DEFINED VERILATOR_HOME)
             PREFIX ${PROJECT_BINARY_DIR}
             CONFIGURE_COMMAND cd ${HELP2MAN_SRC_DIR} && autoconf --output ${HELP2MAN_SRC_DIR}/configure  ${HELP2MAN_SRC_DIR}/configure.ac && ${HELP2MAN_SRC_DIR}/configure --prefix=${HELP2MAN_INSTALL_DIR} && cd -
             BUILD_COMMAND ""
-            INSTALL_COMMAND cd ${HELP2MAN_SRC_DIR} && PATH=${PO4A_INSTALL_DIR}:$ENV{PATH} PERLLIB=${PO4A_INSTALL_DIR}/lib:$ENV{PERLLIB} $(MAKE) install && cd -
+            INSTALL_COMMAND cd ${HELP2MAN_SRC_DIR} && PATH=${PO4A_INSTALL_DIR}:$ENV{PATH} PERLLIB=${PO4A_INSTALL_DIR}/lib:$ENV{PERLLIB} make install && cd -
             DEPENDS po4a
             )
         list(APPEND VERILATOR_DEPENDS help2man)
