@@ -27,6 +27,16 @@ function(find_libs libs)
             list(APPEND libs_found fc4sc::fc4sc)
         endif()
     endif()
+    
+    if(NOT SYSTEMC-AMS_VERSION STREQUAL "FALSE")
+        find_package(SystemCAMS CONFIG REQUIRED
+            PATHS ${SYSTEMC_AMS_HOME}/* ${__VERISC_REL_ROOT}/open/*
+            NO_DEFAULT_PATH
+            )
+    endif()
+    if(SystemCAMS_FOUND)
+        list(APPEND libs_found SystemC::systemc-ams)
+    endif()
 
     if(NOT UVM-SYSTEMC_VERSION STREQUAL "FALSE")
         list(APPEND libs_to_find uvm-systemc)
@@ -41,7 +51,7 @@ function(find_libs libs)
     endif()
 
     foreach(l ${libs_to_find})
-        find_package(${l} CONFIG
+        find_package(${l} CONFIG REQUIRED
             PATHS ${__VERISC_REL_ROOT}/open/*
             NO_DEFAULT_PATH
             )

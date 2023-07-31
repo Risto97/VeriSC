@@ -34,6 +34,9 @@ set(VERILATOR_INSTALL_DIR ${GROUP_INSTALL_DIR}/verilator-${VERILATOR_VERSION})
 
 add_subdirectory(systemc)
 
+if(NOT SYSTEMC-AMS_VERSION STREQUAL "FALSE")
+    add_subdirectory(systemc-ams)
+endif()
 if(NOT UVM-SYSTEMC_VERSION STREQUAL "FALSE")
     add_subdirectory(uvm-systemc)
 endif()
