@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(veriSC VERSION 0.0.4)
+project(veriSC VERSION 0.0.5)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -52,6 +52,7 @@ ExternalProject_Add(tools_install
                 -DVERISC_CFG=${VERISC_CFG}
 
                 -DSYSTEMC_VERSION=${SYSTEMC_VERSION}
+                -DSYSTEMC-AMS_VERSION=${SYSTEMC-AMS_VERSION}
                 -DSCV_VERSION=${SCV_VERSION}
                 -DUVM-SYSTEMC_VERSION=${UVM-SYSTEMC_VERSION}
                 -DVERILATOR_VERSION=${VERILATOR_VERSION}
