@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(veriSC VERSION 0.0.5)
+project(veriSC VERSION 0.0.6)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
