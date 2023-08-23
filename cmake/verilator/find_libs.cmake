@@ -36,10 +36,6 @@ function(find_libs libs)
         list(APPEND libs_to_find scv)
     endif()
 
-    if(NOT UVC_VERSION STREQUAL "FALSE")
-        list(APPEND libs_to_find uvc)
-    endif()
-
     foreach(l ${libs_to_find})
         find_package(${l} CONFIG
             PATHS ${__VERISC_REL_ROOT}/open/*

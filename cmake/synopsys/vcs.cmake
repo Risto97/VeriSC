@@ -140,14 +140,9 @@ function(vcs_tb SC_LIB RTL_LIBS)
         PATHS "${SYSTEMC_UVM_HOME_VCS}/*" NO_DEFAULT_PATH 
         NO_CACHE
         )
-    find_library(uvc_lib uvc
-        PATHS "${UVC_HOME_VCS}/*" NO_DEFAULT_PATH 
-        NO_CACHE
-        )
 
     list(APPEND VCS_EXTRA_LIBS 
         ${sc_uvm_lib}
-        ${uvc_lib}
         )
 
     list(APPEND VCS_EXTRA_INCLUDES 
@@ -155,7 +150,6 @@ function(vcs_tb SC_LIB RTL_LIBS)
         "${SYSTEMC_UVM_HOME_VCS}/include"
         "${FC4SC_HOME_VCS}/includes"
 
-        "${UVC_HOME_VCS}/include"
         )
     list(APPEND VCS_EXTRA_INCLUDES ${ENV_INC_DIR})
 

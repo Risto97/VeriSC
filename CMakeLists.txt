@@ -63,24 +63,6 @@ ExternalProject_Add(tools_install
             )
 
 
-
-if((NOT UVM-SYSTEMC_VERSION STREQUAL "FALSE") AND (NOT SCV_VERSION STREQUAL "FALSE") AND (NOT UVC_VERSION STREQUAL "FALSE"))
-    ExternalProject_Add(uvc
-                DOWNLOAD_COMMAND ""
-                PREFIX ${PROJECT_BINARY_DIR}
-                SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
-                BUILD_ALWAYS 1
-                CMAKE_ARGS
-                    -DCMAKE_INSTALL_PREFIX=${INSTALL_DIRECTORY}/uvc
-                    -DLIBS_CFG_DIR=${INSTALL_DIRECTORY}
-                    -DCMAKE_INSTALL_INCLUDEDIR=include
-                    -DVERISC_INSTALL_DIR=${CMAKE_INSTALL_PREFIX}
-                    -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
-                    -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
-                DEPENDS gcc_install tools_install
-                )
-endif()
-
 # if(NOT DEFINED VCS_HOME AND NOT DEFINED ENV{VCS_HOME})
     # message(WARNING "VCS libraries will not be compiled, VCS will not be used, run cmake with -DVCS_HOME=<path to vcs> or set environment variable VCS_HOME")
 if(1)
@@ -110,24 +92,6 @@ else()
     set(VCS_LIB_PATH "${VCS_HOME}/gnu/linux64/gcc-9.2.0_64/lib64/:${VCS_HOME}/gnu/linux64/gcc-9.2.0_64/lib/:$ENV{LD_LIBRARY_PATH}")
     set(CMAKE_VERBOSE_MAKEFILE TRUE)
     set(VCS_LINKER ${VCS_HOME}/gnu/linux64/binutils-2.33.1_64/bin/ld)
-    ExternalProject_Add(uvc_vcs
-                DOWNLOAD_COMMAND ""
-                PREFIX ${PROJECT_BINARY_DIR}
-                SOURCE_DIR "${PROJECT_SOURCE_DIR}/uvc"
-                BUILD_ALWAYS 1
-                CMAKE_ARGS
-                    -DCMAKE_INSTALL_PREFIX=${VCS_INSTALL_DIRECTORY}/uvc
-                    -DLIBS_CFG_DIR=${VCS_INSTALL_DIRECTORY}
-                    -DINSTALL_GROUP=VCS
-                    -DCMAKE_INSTALL_LIBDIR=lib-linux64
-                    -DCMAKE_INSTALL_INCLUDEDIR=include
-                    -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
-                    -DCMAKE_LINKER=${VCS_LINKER}
-                    -DCMAKE_CXX_COMPILER=${VCS_CXX_COMPILER}
-                    -DCMAKE_C_COMPILER=${VCS_C_COMPILER}
-                    -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
-                DEPENDS tools_install_vcs
-                )
     install(
         DIRECTORY "${PROJECT_SOURCE_DIR}/cmake/synopsys"
         DESTINATION "${CMAKE_INSTALL_PREFIX}/cmake"
