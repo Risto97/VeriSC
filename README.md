@@ -1,5 +1,5 @@
-# This repository is archived and not maintained
-# Development is continued on [SoCMake](https://github.com/HEP-SoC/SoCMake) repository
+
+# :warning: This repository is archived and no longer maintained. Development continued on the [SoCMake](https://github.com/HEP-SoC/SoCMake) repository :warning:
 
 <!-- Improved compatibility of back to top link: See: https://github.com/Risto97/VeriSC/pull/73 -->
 <a name="readme-top"></a>
